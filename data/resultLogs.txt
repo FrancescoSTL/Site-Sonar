@@ -1,0 +1,21 @@
+
+484 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/menu_money.png
+485 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/menu_bleacher.png
+486 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/logo_cnn_nav_bottom.png
+487 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/logo_cnn_nav_bottom.png
+496 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/menu_style.png
+517 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/menu_politics.png
+517 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/logo_cnn_espaniol.png
+515 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/menu_politics.png
+517 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/logo_cnn_arabic.png
+526 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/menu_bleacher.png
+527 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/menu_style.png
+537 http://i.cdn.turner.com/cnn/.e1mo/img/4.0/logos/menu_money.png
+580 http://i2.cdn.turner.com/cnnnext/dam/assets/160620185833-heat-wave-2-large-tease.jpg
+582 http://i2.cdn.turner.com/cnnnext/dam/assets/160724155744-debbie-wasserman-schultz-0723-large-tease.jpg
+621 http://www.i.cdn.cnn.com/.a/1.283.0/js/cnn-analytics.min.js
+696 http://www.i.cdn.cnn.com/.a/bundles/cnn-header.5d7f32869d18510c6c0f-first-bundle.js
+732 http://a.postrelease.com/serve/load.js?async=true
+757 http://z.cdn.turner.com/analytics/cnnexpan/jsmd.min.js
+786 http://www.i.cdn.cnn.com/.a/1.283.0/js/cnn-footer-lib.min.js
+884 http://www.i.cdn.cnn.com/.a/1.283.0/js/cnn-header-second.min.js

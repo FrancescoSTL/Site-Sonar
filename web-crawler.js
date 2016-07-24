@@ -7,14 +7,14 @@ var cheerio = require('cheerio');
 var request = require('request');
 var URL = require('url-parse');
 
-var disconnectList = require('./disconnectList.json');
+var disconnectList = require('./data/disconnectList.json');
 var currentAssets = [];
-var resultLogs = 'resultLogs.txt'
+var resultLogs = 'data/resultLogs.txt';
 
 // init readline object
 var rl = readline.createInterface({
     terminal: false, 
-    input: fs.createReadStream('crawl-list')
+    input: fs.createReadStream('data/crawl-list')
 });
 
 fs.writeFile(resultLogs, '');
@@ -24,34 +24,34 @@ fs.writeFile(resultLogs, '');
 	crawl(URL);
 });*/
 
-crawl('http://www.redtube.com/');
+crawl('http://www.cnn.com/');
 
 /**
 * Crawls the specified URL
 * @param {string} URL - url of the site to crawl
 */
 function crawl(URL) {
-	// reset our current assets if we have any from the last site we crawled
-	currentAssets = [];
+    // reset our current assets if we have any from the last site we crawled
+    currentAssets = [];
 
-	// crawl that website
-	request({uri: URL, time: true}, function(error, response, body) {
-		// in the event that we are thrown an error, log it
-		if(error) {
-     		console.log("Error: " + error);
-   		}
-   		// if not, grab all asset urls from the DOM
-   		else if(response.statusCode === 200) {
-		    // Parse the document body
-		    var $ = cheerio.load(body);
+    // crawl that website
+    request({uri: URL, time: true}, function(error, response, body) {
+        // in the event that we are thrown an error, log it
+        if(error) {
+            console.log('Error: ' + error);
+        }
+        // if not, grab all asset urls from the DOM
+        else if(response.statusCode === 200) {
+            // Parse the document body
+            var $ = cheerio.load(body);
 
-		    findAssets($);
-		    //filterAssets();
-		    testAssets();
-		    
-		    //console.log(currentAssets);
-	    }
-	});
+            findAssets($);
+            //filterAssets();
+            testAssets();
+            
+            //console.log(currentAssets);
+        }
+    });
 }
 
 /**
@@ -59,37 +59,37 @@ function crawl(URL) {
 * @param {object} $ - DOM object for current URL we are crawling
 */
 function findAssets($) {
-	// compile all image assets
-	$('img').each(function(i, elem) {
-		var src = $(this).prop('src');
-		if(src !== undefined && src.indexOf("http") !== -1) {
-			currentAssets.push(src);
-		}
-	});
+    // compile all image assets
+    $('img').each(function() {
+        var src = $(this).prop('src');
+        if(src !== undefined && src.indexOf('http') !== -1) {
+            currentAssets.push(src);
+        }
+    });
 
-	// compile all script assets
-	$('script').each(function(i, elem) {
-		var src = $(this).prop('src');
-		if(src !== undefined && src.indexOf("http") !== -1) {
-			currentAssets.push(src);
-		}
-	});
+    // compile all script assets
+    $('script').each(function() {
+        var src = $(this).prop('src');
+        if(src !== undefined && src.indexOf('http') !== -1) {
+            currentAssets.push(src);
+        }
+    });
 
-	// compile all iframe assets
-	$('iframe').each(function(i, elem) {
-		var src = $(this).prop('src');
-		if(src !== undefined && src.indexOf("http") !== -1) {
-			currentAssets.push(src);
-		}
-	});
+    // compile all iframe assets
+    $('iframe').each(function() {
+        var src = $(this).prop('src');
+        if(src !== undefined && src.indexOf('http') !== -1) {
+            currentAssets.push(src);
+        }
+    });
 
-	// compile all object assets
-	$('object').each(function(i, elem) {
-		var src = $(this).prop('data');
-		if(src !== undefined && src.indexOf("http") !== -1) {
-			currentAssets.push(src);
-		}
-	});
+    // compile all object assets
+    $('object').each(function() {
+        var src = $(this).prop('data');
+        if(src !== undefined && src.indexOf('http') !== -1) {
+            currentAssets.push(src);
+        }
+    });
 }
 
 /**
@@ -103,16 +103,16 @@ function filterAssets() {
 * Loads all asset URLs currently in the currentAssets array and denotes their time in milliseconds
 */
 function testAssets() {
-	// currently, it seems as though this is running asynchronously, but we'd like the requests to be syncrhonous.
-	// we can attempt this with https://github.com/abbr/deasync
+    // currently, it seems as though this is running asynchronously, but we'd like the requests to be syncrhonous.
+    // we can attempt this with https://github.com/abbr/deasync
 
-	// loop through all assets we need to time test
-	for(n in currentAssets) {
-		// crawl that website
-		request({uri: currentAssets[n], time: true}, function(error, response, body) {
-			if(!error) {
-				fs.appendFile(resultLogs, "\n" + response.elapsedTime + " " +response.request.uri.href);
-			}
-		});
-	}
+    // loop through all assets we need to time test
+    for(var n in currentAssets) {
+        // crawl that website
+        request({uri: currentAssets[n], time: true}, function(error, response) {
+            if(!error) {
+                fs.appendFile(resultLogs, '\n' + response.elapsedTime + ' ' +response.request.uri.href);
+            }
+        });
+    }
 }
