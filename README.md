@@ -1,7 +1,7 @@
 # Sherlock
 A tool used to identify ad networks with the slowest loading content on the internet.
 
-Sherlock crawls the web and logs the load time of all advertizing image, script, iframe, and object elementsk. We are utilizing the top 500 Alexa Ranked websites and [Disconnect](https://disconnect.me/)'s list of ad-network domains in order to determine what pages to crawl and what in-page content to benchmark.
+Sherlock crawls the web and logs the load time of all advertizing image, script, iframe, and object elements it finds. We are utilizing the top 500 Alexa Ranked websites and [Disconnect](https://disconnect.me/)'s list of ad-network domains in order to determine what pages to crawl and what in-page content to benchmark.
 
 ## Installing Sherlock
 
