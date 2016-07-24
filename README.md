@@ -13,9 +13,25 @@ git clone https://github.com/FrancescoSTL/sherlock.git
 
 Download and install [Node.js](https://nodejs.org/en/download/)
 
-## Installing Sherlock
+## Running Sherlock
 
 Once you've cloned the repo and installed Node.js, you can start sherlock by running:
 ```
 node web-crawler.js
+```
+
+## Interpreting Results
+
+After Sherlock does its thing, your logs will be located in data/resultLogs.txt. The results are logged using the following pattern:
+`pageLoadTime(in milliseconds) pageURL`
+
+So your output file might look something like the following results from CNN.com:
+```
+582 http://i2.cdn.turner.com/cnnnext/dam/assets/160724155744-debbie-wasserman-schultz-0723-large-tease.jpg
+621 http://www.i.cdn.cnn.com/.a/1.283.0/js/cnn-analytics.min.js
+884 http://www.i.cdn.cnn.com/.a/1.283.0/js/cnn-header-second.min.js
+696 http://www.i.cdn.cnn.com/.a/bundles/cnn-header.5d7f32869d18510c6c0f-first-bundle.js
+732 http://a.postrelease.com/serve/load.js?async=true
+757 http://z.cdn.turner.com/analytics/cnnexpan/jsmd.min.js
+786 http://www.i.cdn.cnn.com/.a/1.283.0/js/cnn-footer-lib.min.js
 ```
