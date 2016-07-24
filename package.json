@@ -1,0 +1,13 @@
+{
+	"name": "sherlock",
+	"version": "0.0.1",
+	"description": "Web crawling with an investigative twist.",
+	"main": "web-crawler.js",
+	"author": "Francesco Polizzi",
+	"license": "Mozilla Public License (MPL)",
+	"dependencies": {
+		"cheerio": "^0.20.0",
+		"url-parse": "^1.1.1",
+		"request": "^2.74.0"
+	}
+}
