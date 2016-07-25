@@ -1,32 +1,82 @@
 /* Node libraries */
-var fs = require('fs');
-var readline = require('readline');
+var fs = require('sdk/fs/path');
+
+/* Add-on SDK Libraries */
+let { Cc, Ci, Cu } = require('chrome');
+var tabs = require("sdk/tabs");
+var {WebRequest} = Cu.import('resource://gre/modules/WebRequest.jsm');
 
 /* Node Modules */
-var cheerio = require('cheerio');
-var request = require('request');
 var URL = require('url-parse');
 
-var disconnectJSON = require('./data/disconnectList.json');
-var disconnectSet = new Set();
-var currentAssets = [];
+/* Sherlock Resources & I/O */
+const {loadLists} = require('./lists');
+const disconnectJSON = require('./data/disconnectBlacklist.json');
 var resultLogs = 'data/resultLogs.txt';
 
+/* Global Variables */
+var disconnectSet = new Set();
+var assetLoadTimes = new Map();
+var currentAssets = [];
+var lastHeaderRecievedTime = Date.now();
+
 // init readline object
-var rl = readline.createInterface({
+/*var rl = readline.createInterface({
     terminal: false, 
     input: fs.createReadStream('data/crawl-list')
-});
+});*/
 
 // erase any leftover junk from our results log
-fs.writeFile(resultLogs, '');
+//fs.writeFile(resultLogs, '');
 
 // parase our blacklist into a set
 parseDisconnectJSON();
 
 // read each line in our crawl-list
-rl.on('line', function (URL) {
+/*rl.on('line', function (URL) {
 	crawl(URL);
+});*/
+
+crawl('http://ksdk.com');
+
+
+// Listen for HTTP headers sent
+this.WebRequest.onSendHeaders.addListener(function(details) {
+    // parse our URL so that we can grab the hostname
+    var newURL = parseURI(details.url);
+
+    // if the asset is from a blacklisted url, start benchmarking by recording header sent time
+    if (isBlacklisted(newURL.host)) {
+        assetLoadTimes.set(details.requestId, Date.now());
+    }
+});
+
+// Listen for HTTP headers recieved
+this.WebRequest.onHeadersReceived.addListener(function(details) {
+    // parse our URL so that we can grab the hostname
+    var newURL = parseURI(details.url);
+            console.log(newURL.host);
+
+    console.log(newURL.host);
+    console.log(details);
+    
+    // if the asset is from a blacklisted url, finish benchmarking by recording the time elapsed since we sent the header to the time we recieved it
+    if (isBlacklisted(newURL.host)) {
+        
+
+        /*var assetSentTime = assetLoadTimes(details.requestId);
+        assetLoadTimes.set(details.requestId, (Date.now() - assetSentTime));*/
+    }
+
+    // keep logging our assets until there has been more than 1 second since the last header was recieved
+    if ((Date.now() - lastHeaderRecievedTime)  >= 1000) {
+        // if we've finished loading content on this page, close the current tab and crawl the next page in our list
+        console.log("no more");
+        //console.log(assetLoadTimes);
+    } else {
+        // if we haven't finished loading content, check to see if the header we recieved is an ad
+        lastHeaderRecievedTime = Date.now();
+    }
 });
 
 /**
@@ -38,74 +88,30 @@ function crawl(URL) {
     currentAssets = [];
 
     // crawl that website
-    request({uri: URL, time: true}, function(error, response, body) {
-        // in the event that we are thrown an error, log it
-        if(error) {
-            //console.log('Error: ' + error);
-        }
-        // if not, grab all asset urls from the DOM
-        else if(response.statusCode === 200) {
-            // Parse the document body
-            var $ = cheerio.load(body);
-
-            findAssets($);
-            currentAssets = currentAssets.filter(filterAssets);
-            testAssets();
-        }
-    });
+    tabs.open(URL);
 }
 
 /**
-* Adds all assets from the passed DOM object to the currentAssets array
-* @param {object} $ - DOM object for current URL we are crawling
+* Check if a URL is contained within Disconnect's list of ad domains
 */
-function findAssets($) {
-    // compile all script assets
-    $('script, img, iframe').each(function() {
-        var src = $(this).prop('src');
-        if(src !== undefined && src.indexOf('http') !== -1) {
-            currentAssets.push(src);
-        }
-    });
-
-    // compile all object assets
-    $('object').each(function() {
-        var src = $(this).prop('data');
-        if(src !== undefined && src.indexOf('http') !== -1) {
-            currentAssets.push(src);
-        }
-    });
-}
-
-/**
-* Filter our list of assets based upon Disconnect's list of ad domains
-*/
-function filterAssets(checkURL) {
-	var url = new URL(checkURL);
-	console.log(url.host);
-	if (disconnectSet.has(url.host)) {
-		
+function isBlacklisted(url) {
+	if (disconnectSet.has(url)) {
 		return true;
 	} else {
 		return false;
 	}
 }
 
-/**
-* Loads all asset URLs currently in the currentAssets array and denotes their time in milliseconds
-*/
-function testAssets() {
-    // currently, it seems as though this is running asynchronously, but we'd like the requests to be syncrhonous.
-    // we can attempt this with https://github.com/abbr/deasync
-
-    // loop through all assets we need to time test
-    for(var n in currentAssets) {
-        // crawl that website
-        request({uri: currentAssets[n], time: true}, function(error, response) {
-            if(!error) {
-                fs.appendFile(resultLogs, '\n' + response.elapsedTime + ' ' +response.request.uri.href);
-            }
-        });
+function parseURI(href) {
+    var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+    return match && {
+        protocol: match[1],
+        host: match[2],
+        hostname: match[3],
+        port: match[4],
+        pathname: match[5],
+        search: match[6],
+        hash: match[7]
     }
 }
 
