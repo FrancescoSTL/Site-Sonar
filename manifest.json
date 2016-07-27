@@ -9,9 +9,8 @@
     "48": "icons/border-48.png"
   },
   "background": {
-    "scripts": ["web-crawler2.js"]
+    "scripts": ["web-crawler2.bundle.js"]
   },
-
   "applications": {
     "gecko": {
       "id": "sherlock@mozilla.org",

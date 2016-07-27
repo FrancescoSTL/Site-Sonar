@@ -39,45 +39,47 @@ parseDisconnectJSON();
 
 crawl('http://ksdk.com');
 
+function startListeners(state) {
+    //console.log(state);
+    // Listen for HTTP headers sent
+    this.WebRequest.onSendHeaders.addListener(function(details) {
+        // parse our URL so that we can grab the hostname
+        var newURL = parseURI(details.url);
 
-// Listen for HTTP headers sent
-this.WebRequest.onSendHeaders.addListener(function(details) {
-    // parse our URL so that we can grab the hostname
-    var newURL = parseURI(details.url);
+        // if the asset is from a blacklisted url, start benchmarking by recording header sent time
+        if (isBlacklisted(newURL.host)) {
+            assetLoadTimes.set(details.requestId, Date.now());
+        }
+    });
 
-    // if the asset is from a blacklisted url, start benchmarking by recording header sent time
-    if (isBlacklisted(newURL.host)) {
-        assetLoadTimes.set(details.requestId, Date.now());
-    }
-});
+    // Listen for HTTP headers recieved
+    this.WebRequest.onHeadersReceived.addListener(function(details) {
+        // parse our URL so that we can grab the hostname
+        var newURL = parseURI(details.url);
+                console.log(newURL.host);
 
-// Listen for HTTP headers recieved
-this.WebRequest.onHeadersReceived.addListener(function(details) {
-    // parse our URL so that we can grab the hostname
-    var newURL = parseURI(details.url);
-            console.log(newURL.host);
-
-    console.log(newURL.host);
-    console.log(details);
-    
-    // if the asset is from a blacklisted url, finish benchmarking by recording the time elapsed since we sent the header to the time we recieved it
-    if (isBlacklisted(newURL.host)) {
+        console.log(newURL.host);
+        console.log(details);
         
+        // if the asset is from a blacklisted url, finish benchmarking by recording the time elapsed since we sent the header to the time we recieved it
+        if (isBlacklisted(newURL.host)) {
+            
 
-        /*var assetSentTime = assetLoadTimes(details.requestId);
-        assetLoadTimes.set(details.requestId, (Date.now() - assetSentTime));*/
-    }
+            /*var assetSentTime = assetLoadTimes(details.requestId);
+            assetLoadTimes.set(details.requestId, (Date.now() - assetSentTime));*/
+        }
 
-    // keep logging our assets until there has been more than 1 second since the last header was recieved
-    if ((Date.now() - lastHeaderRecievedTime)  >= 1000) {
-        // if we've finished loading content on this page, close the current tab and crawl the next page in our list
-        console.log("no more");
-        //console.log(assetLoadTimes);
-    } else {
-        // if we haven't finished loading content, check to see if the header we recieved is an ad
-        lastHeaderRecievedTime = Date.now();
-    }
-});
+        // keep logging our assets until there has been more than 1 second since the last header was recieved
+        if ((Date.now() - lastHeaderRecievedTime)  >= 1000) {
+            // if we've finished loading content on this page, close the current tab and crawl the next page in our list
+            console.log("no more");
+            //console.log(assetLoadTimes);
+        } else {
+            // if we haven't finished loading content, check to see if the header we recieved is an ad
+            lastHeaderRecievedTime = Date.now();
+        }
+    });
+}
 
 /**
 * Crawls the specified URL

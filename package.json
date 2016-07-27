@@ -1,0 +1,23 @@
+{
+  "name": "sherlock",
+  "version": "0.0.1",
+  "description": "Investigating the worst players in slow-loading advertisements on the web.",
+  "main": "web-crawler2.bundle.js",
+  "scripts": {
+    "bundle": "browserify web-crawler2.js > web-crawler2.bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FrancescoSTL/sherlock"
+  },
+  "author": "Francesco Polizzi",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/FrancescoSTL/sherlock/issues"
+  },
+  "homepage": "https://github.com/FrancescoSTL/sherlock#readme",
+  "devDependencies": {
+    "browserify": "13.0.1",
+    "web-ext": "1.3.0"
+  }
+}

@@ -1,8 +1,15 @@
 /* Global Variables */
-var disconnectSet = new Set();
+var blacklistSet = new Set();
 var assetLoadTimes = new Map();
 var currentAssets = [];
 var lastHeaderReceivedTime = Date.now();
+
+/* Sherlock Resources & I/O */
+const disconnectJSON = require('./data/disconnectBlacklist.json');
+const disconnectEntitylist = require('./data/disconnectEntitylist.json');
+
+// parse our blacklist
+parseDisconnectJSON();
 
 // general flow:
 // 1. trigger page load
@@ -11,6 +18,7 @@ var lastHeaderReceivedTime = Date.now();
 // 4. when timeout completes, remove onheadersrecieved listener, iterate through the logged results, and log them as errors/timeouts
 // 5. trigger new page load
 
+// start our listeners
 startRequestListeners();
 
 function startRequestListeners() {
@@ -29,8 +37,6 @@ function startRequestListeners() {
 	    // parse our URL so that we can grab the hostname
 	    var newURL = parseURI(details.url);
 
-
-
 	    // get the asset details
 	    var assetDetails = assetLoadTimes.get(details.requestId);
 	    // set the asset complete time
@@ -43,11 +49,8 @@ function startRequestListeners() {
 	browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) { 
 		if(changeInfo.status == 'complete') {
 			console.log("DONE");
-			console.log([...assetLoadTimes].map(function(item) {
+			console.table([...assetLoadTimes].map(function(item) {
 				return item[1];
-
-			}).sort(function(a,b) {
-				return a.assetCompleteTime > b.assetCompleteTime ? -1 : 1;
 			}));
 		}
 	});
@@ -61,11 +64,9 @@ function removeRequestListeners() {
 * @param {string} URL - url of the site to crawl
 */
 function crawl() {
-    /*// reset our current assets if we have any from the last site we crawled
+    // reset our current assets if we have any from the last site we crawled
     currentAssets = [];
 
-    // crawl that website
-    tabs.open(URL);*/
     console.log("DONE");
 }
 
@@ -81,3 +82,21 @@ function parseURI(href) {
         hash: match[7]
     }
 }
+
+/**
+* Parses our disconnect JSON into a set of blacklisted hostname + subdomain urls
+*/
+function parseDisconnectJSON() {
+	// parse our disconnect JSON into a set where we only include the hostname and subdomain urls
+	for(var category in disconnectJSON.categories.Advertising) {
+		for(var network in disconnectJSON.categories.Advertising[category]) {
+			for(var hostname in disconnectJSON.categories.Advertising[category][network]) {
+				blacklistSet.add(hostname);
+				for(var subDomain in disconnectJSON.categories.Advertising[category][network][hostname]) {
+					blacklistSet.add(disconnectJSON.categories.Advertising[category][network][hostname][subDomain]);
+				}
+			}
+		}
+	}
+}
+
