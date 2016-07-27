@@ -1,13 +1,23 @@
 {
-	"name": "sherlock",
-	"version": "0.0.1",
-	"description": "Web crawling with an investigative twist.",
-	"main": "web-crawler.js",
-	"author": "Francesco Polizzi",
-	"license": "Mozilla Public License (MPL)",
-	"dependencies": {
-		"cheerio": "^0.20.0",
-		"url-parse": "^1.1.1",
-		"request": "^2.74.0"
-	}
+  "name": "sherlock",
+  "version": "0.0.1",
+  "description": "Investigating the worst players in slow-loading advertisements on the web.",
+  "main": "web-crawler.bundle.js",
+  "scripts": {
+    "bundle": "browserify web-crawler.js > js/web-crawler.bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FrancescoSTL/sherlock"
+  },
+  "author": "Francesco Polizzi",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/FrancescoSTL/sherlock/issues"
+  },
+  "homepage": "https://github.com/FrancescoSTL/sherlock#readme",
+  "devDependencies": {
+    "browserify": "13.0.1",
+    "web-ext": "1.3.0"
+  }
 }

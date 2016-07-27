@@ -1,112 +1,147 @@
-/* Node libraries */
-var fs = require('fs');
-var readline = require('readline');
-
-/* Node Modules */
-var cheerio = require('cheerio');
-var request = require('request');
-var URL = require('url-parse');
-
-var disconnectJSON = require('./data/disconnectList.json');
-var disconnectSet = new Set();
+/* Global Variables */
+var blocklistSet = new Set();
+var assetLoadTimes = new Map();
 var currentAssets = [];
-var resultLogs = 'data/resultLogs.txt';
+var lastHeaderReceivedTime = Date.now();
 
-// init readline object
-var rl = readline.createInterface({
-    terminal: false, 
-    input: fs.createReadStream('data/crawl-list')
-});
+/* Sherlock Resources & JS */
+const disconnectJSON = require('./data/disconnectBlacklist.json');
+const disconnectEntitylist = require('./data/disconnectEntitylist.json');
+var {allHosts, canonicalizeHost} = require('./js/canonicalize');
 
-// erase any leftover junk from our results log
-fs.writeFile(resultLogs, '');
-
-// parase our blacklist into a set
+// parse our blacklist
 parseDisconnectJSON();
 
-// read each line in our crawl-list
-rl.on('line', function (URL) {
-	crawl(URL);
-});
+// general flow:
+// 1. trigger page load
+// 2. when page is requested, start listeners and log results
+// 3. when page is completed via tabs onupdated, remove sendheaders listener, stop logging results, and set timeout for checking for uncompleted requests
+// 4. when timeout completes, remove onheadersrecieved listener, iterate through the logged results, and log them as errors/timeouts
+// 5. trigger new page load
+
+// start our listeners
+startRequestListeners();
+
+function startRequestListeners() {
+	// Listen for HTTP headers sent
+	browser.webRequest.onSendHeaders.addListener(function(details) {
+	    // if the asset is from a blacklisted url, start benchmarking by saving the asset details
+
+	    if(isBlacklisted(details)) {
+			assetLoadTimes.set(details.requestId, details);
+		}
+	}, {urls:["*://*/*"]});
+
+	// Listen for HTTP headers recieved
+	browser.webRequest.onHeadersReceived.addListener(function(details) {
+	    if(isBlacklisted(details)) {
+		    // get the asset details
+		    var assetDetails = assetLoadTimes.get(details.requestId);
+		    // set the asset complete time
+		    assetDetails.assetCompleteTime = (Date.now() - assetDetails.timeStamp);
+		    // save the asset details
+		    assetLoadTimes.set(details.requestId, assetDetails);
+		}
+	}, {urls:["*://*/*"]});
+
+	// Listen for page load completion
+	browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) { 
+		if(changeInfo.status == 'complete') {
+			console.log(assetLoadTimes);
+		}
+	});
+}
+
+function removeRequestListeners() {
+
+}
+
+function isBlacklisted(details) {
+	var privlegedOrigin = false;
+	var hostinBlocklist = false;
+	var requestHostMatchesMainFrame = false;
+	var requestEntityName;
+	
+	// canonicalize the origin address
+	var unparsedOrigin = parseURI(details.originUrl).host;
+	origin = canonicalizeHost(unparsedOrigin);
+
+	// if it is originating from firefox, new window, or newtab, it is definitely not blacklisted
+	privlegedOrigin = ((typeof origin !== 'undefined' && origin.includes('moz-nullprincipal')) || origin === '');
+	if (privlegedOrigin) {
+		// so return false
+		return false;
+	}
+
+	// canoniocalize the host address
+	var unparsedHost = parseURI(details.url).host;
+	host = canonicalizeHost(unparsedHost);
+    // check if any host from lowest-level to top-level is in the blocklist
+    var allRequestHosts = allHosts(host);
+    for (let requestHost of allRequestHosts) {
+      	hostinBlocklist = blocklistSet.has(requestHost);
+      	if (hostinBlocklist) {
+        	break;
+      	}
+	}
+
+	// if it is a request to a 3rd party domain which isn't in the blocklist, return false
+	if (!hostinBlocklist) {
+		return false;
+	}
+
+	// if it is a third party request
+	if (origin !== host) {
+		// if it is a request to the main frame from a sub frame
+		requestHostMatchesMainFrame = details.frameId > 0;
+      	if (requestHostMatchesMainFrame) {
+      		// we should allow it, so return false
+        	return false;
+		}
+
+		// determine whether the request origin/host is an allowed property/resource of the entity
+		for (var entityName in disconnectEntitylist) {
+			var entity = disconnectEntitylist[entityName];
+			var requestIsEntityResource = false;
+			var originIsEntityProperty = false;
+
+			// check if the host is a resource of the entity
+			for (var requestHost of allHosts(host)) {
+				// if it is an entity
+				requestIsEntityResource = entity.resources.indexOf(host) > -1;
+				if (requestIsEntityResource) {
+					// take note of its name
+					requestEntityName = entityName;
+					break;
+				}
+			}
+
+			// check to see if the origin is a property of the entity
+			for (var requestOrigin of allHosts(origin)) {
+				originIsEntityProperty = entity.properties.indexOf(origin) > -1;
+				if(originIsEntityProperty) {
+					break;
+				}
+			}
+
+			// if our origin is a property and host is a resource of the entity, return false
+			if (originIsEntityProperty && requestIsEntityResource) {
+				return false;
+			}
+		}
+
+		// if none of the cases above are reached, we have an element we should block, so return true
+		return true;
+	}
+}
 
 /**
 * Crawls the specified URL
 * @param {string} URL - url of the site to crawl
 */
-function crawl(URL) {
+function crawl() {
     // reset our current assets if we have any from the last site we crawled
     currentAssets = [];
-
-    // crawl that website
-    request({uri: URL, time: true}, function(error, response, body) {
-        // in the event that we are thrown an error, log it
-        if(error) {
-            //console.log('Error: ' + error);
-        }
-        // if not, grab all asset urls from the DOM
-        else if(response.statusCode === 200) {
-            // Parse the document body
-            var $ = cheerio.load(body);
-
-            findAssets($);
-            currentAssets = currentAssets.filter(filterAssets);
-            testAssets();
-        }
-    });
-}
-
-/**
-* Adds all assets from the passed DOM object to the currentAssets array
-* @param {object} $ - DOM object for current URL we are crawling
-*/
-function findAssets($) {
-    // compile all script assets
-    $('script, img, iframe').each(function() {
-        var src = $(this).prop('src');
-        if(src !== undefined && src.indexOf('http') !== -1) {
-            currentAssets.push(src);
-        }
-    });
-
-    // compile all object assets
-    $('object').each(function() {
-        var src = $(this).prop('data');
-        if(src !== undefined && src.indexOf('http') !== -1) {
-            currentAssets.push(src);
-        }
-    });
-}
-
-/**
-* Filter our list of assets based upon Disconnect's list of ad domains
-*/
-function filterAssets(checkURL) {
-	var url = new URL(checkURL);
-	console.log(url.host);
-	if (disconnectSet.has(url.host)) {
-		
-		return true;
-	} else {
-		return false;
-	}
-}
-
-/**
-* Loads all asset URLs currently in the currentAssets array and denotes their time in milliseconds
-*/
-function testAssets() {
-    // currently, it seems as though this is running asynchronously, but we'd like the requests to be syncrhonous.
-    // we can attempt this with https://github.com/abbr/deasync
-
-    // loop through all assets we need to time test
-    for(var n in currentAssets) {
-        // crawl that website
-        request({uri: currentAssets[n], time: true}, function(error, response) {
-            if(!error) {
-                fs.appendFile(resultLogs, '\n' + response.elapsedTime + ' ' +response.request.uri.href);
-            }
-        });
-    }
 }
 
 /**
@@ -117,11 +152,25 @@ function parseDisconnectJSON() {
 	for(var category in disconnectJSON.categories.Advertising) {
 		for(var network in disconnectJSON.categories.Advertising[category]) {
 			for(var hostname in disconnectJSON.categories.Advertising[category][network]) {
-				disconnectSet.add(hostname);
+				blocklistSet.add(hostname);
 				for(var subDomain in disconnectJSON.categories.Advertising[category][network][hostname]) {
-					disconnectSet.add(disconnectJSON.categories.Advertising[category][network][hostname][subDomain]);
+					blocklistSet.add(disconnectJSON.categories.Advertising[category][network][hostname][subDomain]);
 				}
 			}
 		}
 	}
 }
+
+function parseURI(url) {
+    var match = url.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+    return match && {
+        protocol: match[1],
+        host: match[2],
+        hostname: match[3],
+        port: match[4],
+        pathname: match[5],
+        search: match[6],
+        hash: match[7]
+    }
+}
+

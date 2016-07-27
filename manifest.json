@@ -1,0 +1,25 @@
+
+{
+  "description": "Investigating the worst players in slow-loading advertisements on the web.",
+  "manifest_version": 2,
+  "name": "sherlock",
+  "version": "0.1",
+  "homepage_url": "https://github.com/FrancescoSTL/sherlock",
+  "icons": {
+    "48": "icons/border-48.png"
+  },
+  "background": {
+    "scripts": ["js/web-crawler.bundle.js"]
+  },
+  "applications": {
+    "gecko": {
+      "id": "sherlock@mozilla.org",
+      "strict_min_version": "45.0"
+    }
+  },
+  "permissions": [
+    "storage",
+    "webRequest",
+    "webNavigation"
+  ]
+}
