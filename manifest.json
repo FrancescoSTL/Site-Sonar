@@ -9,7 +9,7 @@
     "48": "icons/border-48.png"
   },
   "background": {
-    "scripts": ["web-crawler2.bundle.js"]
+    "scripts": ["js/web-crawler.bundle.js"]
   },
   "applications": {
     "gecko": {

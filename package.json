@@ -2,9 +2,9 @@
   "name": "sherlock",
   "version": "0.0.1",
   "description": "Investigating the worst players in slow-loading advertisements on the web.",
-  "main": "web-crawler2.bundle.js",
+  "main": "web-crawler.bundle.js",
   "scripts": {
-    "bundle": "browserify web-crawler2.js > web-crawler2.bundle.js"
+    "bundle": "browserify web-crawler.js > js/web-crawler.bundle.js"
   },
   "repository": {
     "type": "git",
