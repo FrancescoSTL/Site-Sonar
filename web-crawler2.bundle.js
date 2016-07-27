@@ -18250,15 +18250,80 @@ module.exports={
 }
 
 },{}],3:[function(require,module,exports){
+var ip4DecimalPattern = '^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$'
+var ip4HexPattern = '^(?:(?:0x[0-9a-f]{1,2}).){3}(?:0x[0-9a-f]{1,2})$'
+var ip4OctalPattern = '^(?:(?:03[1-7][0-7]|0[12][0-7]{1,2}|[0-7]{1,2}).){3}(?:03[1-7][0-7]|0[12][0-7]{1,2}|[0-7]{1,2})$'
+
+// like trim() helper from underscore.string:
+// trims chars from beginning and end of str
+function trim (str, chars) {
+  // escape any regexp chars
+  chars = chars.replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1')
+  return str.replace(new RegExp('^' + chars + '+|' + chars + '+$', 'g'), '')
+}
+
+// https://developers.google.com/safe-browsing/v4/urls-hashing#canonicalization
+function canonicalizeHost (host) {
+  // Remove all leading and trailing dots
+  var canonicalizedHost = trim(host, '.')
+
+  // Replace consecutive dots with a single dot
+  canonicalizedHost = canonicalizedHost.replace(new RegExp('[.]+', 'g'), '.')
+
+  // If the hostname can be parsed as an IP address,
+  // normalize it to 4 dot-separated decimal values.
+  // The client should handle any legal IP-address encoding,
+  // including octal, hex, and TODO: fewer than four components
+  var base = 10
+  var isIP4Decimal, isIP4Hex, isIP4Octal
+
+  isIP4Decimal = canonicalizedHost.match(ip4DecimalPattern) != null
+  isIP4Hex = canonicalizedHost.match(ip4HexPattern) != null
+  isIP4Octal = canonicalizedHost.match(ip4OctalPattern) != null
+  if (isIP4Decimal || isIP4Hex || isIP4Octal) {
+    if (isIP4Hex) {
+      base = 16
+    } else if (isIP4Octal) {
+      base = 8
+    }
+    canonicalizedHost = canonicalizedHost.split('.').map(num => parseInt(num, base)).join('.')
+  }
+
+  // Lowercase the whole string
+  canonicalizedHost = canonicalizedHost.toLowerCase()
+  return canonicalizedHost
+}
+
+function allHosts (host) {
+  const allHosts = []
+  const hostParts = host.split('.')
+  while (hostParts.length > 1) {
+    allHosts.push(hostParts.join('.'))
+    hostParts.splice(0, 1)
+  }
+  return allHosts
+}
+
+module.exports = {
+  allHosts,
+  canonicalizeHost,
+  trim
+}
+
+},{}],4:[function(require,module,exports){
 /* Global Variables */
-var blacklistSet = new Set();
+var blocklistSet = new Set();
 var assetLoadTimes = new Map();
 var currentAssets = [];
 var lastHeaderReceivedTime = Date.now();
 
-/* Sherlock Resources & I/O */
+/* Sherlock Resources & JS */
 const disconnectJSON = require('./data/disconnectBlacklist.json');
 const disconnectEntitylist = require('./data/disconnectEntitylist.json');
+var {allHosts, canonicalizeHost} = require('./js/canonicalize');
+
+// parse our blacklist
+parseDisconnectJSON();
 
 // general flow:
 // 1. trigger page load
@@ -18267,50 +18332,120 @@ const disconnectEntitylist = require('./data/disconnectEntitylist.json');
 // 4. when timeout completes, remove onheadersrecieved listener, iterate through the logged results, and log them as errors/timeouts
 // 5. trigger new page load
 
-parseDisconnectJSON();
-
-console.log(disconnectEntitylist);
-console.log(blacklistSet);
+// start our listeners
 startRequestListeners();
 
 function startRequestListeners() {
 	// Listen for HTTP headers sent
 	browser.webRequest.onSendHeaders.addListener(function(details) {
-	    // parse our URL so that we can grab the hostname
-	    var newURL = parseURI(details.url);
-
 	    // if the asset is from a blacklisted url, start benchmarking by saving the asset details
-		assetLoadTimes.set(details.requestId, details);
-		//console.log(assetLoadTimes.get(details.requestId));
+
+	    if(isBlacklisted(details)) {
+			assetLoadTimes.set(details.requestId, details);
+		}
 	}, {urls:["*://*/*"]});
 
 	// Listen for HTTP headers recieved
 	browser.webRequest.onHeadersReceived.addListener(function(details) {
-	    // parse our URL so that we can grab the hostname
-	    var newURL = parseURI(details.url);
-
-
-
-	    // get the asset details
-	    var assetDetails = assetLoadTimes.get(details.requestId);
-	    // set the asset complete time
-	    assetDetails.assetCompleteTime = (Date.now() - assetDetails.timeStamp);
-	    // save the asset details
-	    assetLoadTimes.set(details.requestId, assetDetails);
+	    if(isBlacklisted(details)) {
+		    // get the asset details
+		    var assetDetails = assetLoadTimes.get(details.requestId);
+		    // set the asset complete time
+		    assetDetails.assetCompleteTime = (Date.now() - assetDetails.timeStamp);
+		    // save the asset details
+		    assetLoadTimes.set(details.requestId, assetDetails);
+		}
 	}, {urls:["*://*/*"]});
 
 	// Listen for page load completion
 	browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) { 
 		if(changeInfo.status == 'complete') {
-			console.log("DONE");
-			console.table([...assetLoadTimes].map(function(item) {
-				return item[1];
-			}));
+			console.log(assetLoadTimes);
 		}
 	});
 }
 
 function removeRequestListeners() {
+
+}
+
+function isBlacklisted(details) {
+	var privlegedOrigin = false;
+	var hostinBlocklist = false;
+	var requestHostMatchesMainFrame = false;
+	var requestEntityName;
+	
+	// canonicalize the origin address
+	var unparsedOrigin = parseURI(details.originUrl).host;
+	origin = canonicalizeHost(unparsedOrigin);
+
+	// if it is originating from firefox, new window, or newtab, it is definitely not blacklisted
+	privlegedOrigin = ((typeof origin !== 'undefined' && origin.includes('moz-nullprincipal')) || origin === '');
+	if (privlegedOrigin) {
+		// so return false
+		return false;
+	}
+
+	// canoniocalize the host address
+	var unparsedHost = parseURI(details.url).host;
+	host = canonicalizeHost(unparsedHost);
+    // check if any host from lowest-level to top-level is in the blocklist
+    var allRequestHosts = allHosts(host);
+    for (let requestHost of allRequestHosts) {
+      	hostinBlocklist = blocklistSet.has(requestHost);
+      	if (hostinBlocklist) {
+        	break;
+      	}
+	}
+
+	// if it is a request to a 3rd party domain which isn't in the blocklist, return false
+	if (!hostinBlocklist) {
+		return false;
+	}
+
+	// if it is a third party request
+	if (origin !== host) {
+		// if it is a request to the main frame from a sub frame
+		requestHostMatchesMainFrame = details.frameId > 0;
+      	if (requestHostMatchesMainFrame) {
+      		// we should allow it, so return false
+        	return false;
+		}
+
+		// determine whether the request origin/host is an allowed property/resource of the entity
+		for (var entityName in disconnectEntitylist) {
+			var entity = disconnectEntitylist[entityName];
+			var requestIsEntityResource = false;
+			var originIsEntityProperty = false;
+
+			// check if the host is a resource of the entity
+			for (var requestHost of allHosts(host)) {
+				// if it is an entity
+				requestIsEntityResource = entity.resources.indexOf(host) > -1;
+				if (requestIsEntityResource) {
+					// take note of its name
+					requestEntityName = entityName;
+					break;
+				}
+			}
+
+			// check to see if the origin is a property of the entity
+			for (var requestOrigin of allHosts(origin)) {
+				originIsEntityProperty = entity.properties.indexOf(origin) > -1;
+				if(originIsEntityProperty) {
+					break;
+				}
+			}
+
+			// if our origin is a property and host is a resource of the entity, return false
+			if (originIsEntityProperty && requestIsEntityResource) {
+				return false;
+			}
+		}
+
+		// if none of the cases above are reached, we have an element we should block, so return true
+		return true;
+	}
 }
 
 /**
@@ -18318,16 +18453,29 @@ function removeRequestListeners() {
 * @param {string} URL - url of the site to crawl
 */
 function crawl() {
-    /*// reset our current assets if we have any from the last site we crawled
+    // reset our current assets if we have any from the last site we crawled
     currentAssets = [];
-
-    // crawl that website
-    tabs.open(URL);*/
-    console.log("DONE");
 }
 
-function parseURI(href) {
-    var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+/**
+* Parses our disconnect JSON into a set of blacklisted hostname + subdomain urls
+*/
+function parseDisconnectJSON() {
+	// parse our disconnect JSON into a set where we only include the hostname and subdomain urls
+	for(var category in disconnectJSON.categories.Advertising) {
+		for(var network in disconnectJSON.categories.Advertising[category]) {
+			for(var hostname in disconnectJSON.categories.Advertising[category][network]) {
+				blocklistSet.add(hostname);
+				for(var subDomain in disconnectJSON.categories.Advertising[category][network][hostname]) {
+					blocklistSet.add(disconnectJSON.categories.Advertising[category][network][hostname][subDomain]);
+				}
+			}
+		}
+	}
+}
+
+function parseURI(url) {
+    var match = url.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
     return match && {
         protocol: match[1],
         host: match[2],
@@ -18339,22 +18487,5 @@ function parseURI(href) {
     }
 }
 
-/**
-* Parses our disconnect JSON into a set of blacklisted hostname + subdomain urls
-*/
-function parseDisconnectJSON() {
-	// parse our disconnect JSON into a set where we only include the hostname and subdomain urls
-	for(var category in disconnectJSON.categories.Advertising) {
-		for(var network in disconnectJSON.categories.Advertising[category]) {
-			for(var hostname in disconnectJSON.categories.Advertising[category][network]) {
-				blacklistSet.add(hostname);
-				for(var subDomain in disconnectJSON.categories.Advertising[category][network][hostname]) {
-					blacklistSet.add(disconnectJSON.categories.Advertising[category][network][hostname][subDomain]);
-				}
-			}
-		}
-	}
-}
 
-
-},{"./data/disconnectBlacklist.json":1,"./data/disconnectEntitylist.json":2}]},{},[3]);
+},{"./data/disconnectBlacklist.json":1,"./data/disconnectEntitylist.json":2,"./js/canonicalize":3}]},{},[4]);
