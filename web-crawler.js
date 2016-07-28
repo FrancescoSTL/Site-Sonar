@@ -3,10 +3,17 @@ var blocklistSet = new Set();
 var assetLoadTimes = new Map();
 var currentAssets = [];
 var lastHeaderReceivedTime = Date.now();
+var currentSiteNum = 0;
+var sendHeaderListener;
+var receiveHeaderListener;
+var tabUpdateListener;
+var completedLoad = false;
+var numHeadersSent = 0;
 
 /* Sherlock Resources & JS */
 const disconnectJSON = require('./data/disconnectBlacklist.json');
 const disconnectEntitylist = require('./data/disconnectEntitylist.json');
+const crawlList = require('./data/crawl-list.json');
 var {allHosts, canonicalizeHost} = require('./js/canonicalize');
 
 // parse our blacklist
@@ -19,21 +26,23 @@ parseDisconnectJSON();
 // 4. when timeout completes, remove onheadersrecieved listener, iterate through the logged results, and log them as errors/timeouts
 // 5. trigger new page load
 
-// start our listeners
-startRequestListeners();
+// start crawling the first website
+crawl(crawlList.sites[currentSiteNum]);
 
 function startRequestListeners() {
 	// Listen for HTTP headers sent
-	browser.webRequest.onSendHeaders.addListener(function(details) {
+	sendHeaderListener = browser.webRequest.onSendHeaders.addListener(function(details) {
 	    // if the asset is from a blacklisted url, start benchmarking by saving the asset details
 
 	    if(isBlacklisted(details)) {
+	    	numHeadersSent++;
 			assetLoadTimes.set(details.requestId, details);
+			console.log("-");
 		}
 	}, {urls:["*://*/*"]});
 
 	// Listen for HTTP headers recieved
-	browser.webRequest.onHeadersReceived.addListener(function(details) {
+	receiveHeaderListener = browser.webRequest.onHeadersReceived.addListener(function(details) {
 	    if(isBlacklisted(details)) {
 		    // get the asset details
 		    var assetDetails = assetLoadTimes.get(details.requestId);
@@ -41,19 +50,62 @@ function startRequestListeners() {
 		    assetDetails.assetCompleteTime = (Date.now() - assetDetails.timeStamp);
 		    // save the asset details
 		    assetLoadTimes.set(details.requestId, assetDetails);
+
+		    // if we've finished loading the page, all requests sent have been recieved back, 
+		    // and we aren't on the last url
+		    if(completedLoad && numHeadersSent === assetLoadTimes.size && currentSiteNum < 499) {
+		    	// log all our results
+				console.log(assetLoadTimes);
+
+				// navigate to the next page
+				crawl(crawlList.sites[currentSiteNum]);
+			} else {
+				console.log("waiting on " + (assetLoadTimes.size-numHeadersSent) + " resources");
+			}
 		}
 	}, {urls:["*://*/*"]});
 
-	// Listen for page load completion
-	browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) { 
-		if(changeInfo.status == 'complete') {
+	/*tabUpdateListener = browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) { 
+		if(changeInfo.status === 'complete' && !completed) {
+			console.log("done");
+			completed = true;
+	
+			// log all our results
 			console.log(assetLoadTimes);
+		
+
+			// if we aren't on the last url, keep navigating
+			if (currentSiteNum < 499) {
+				crawl(crawlList.sites[currentSiteNum]);
+			}
 		}
-	});
+	});*/
+
 }
 
-function removeRequestListeners() {
 
+/*
+	This function is problematic. It is triggering "done" way before the page is truly done loading
+*/
+tabUpdateListener = browser.webRequest.onCompleted.addListener(function(details) {
+	// if we've finished loading the page (& hopefully finished sending our requests)
+	if (!completedLoad) {
+		// note that we have completed that
+		completedLoad = true;
+	
+		// if we haven't actually logged any blackisted stuff and we aren't on the last url
+		/*if (assetLoadTimes.size === 0 && currentSiteNum < 499) {
+			console.log("no blacklisted assets found");
+
+			// navigate to the next page
+			crawl(crawlList.sites[currentSiteNum]);
+		}*/
+	}
+}, {urls:["*://*/*"]});
+
+function removeSendListener() {
+	browser.webRequest.onSendHeaders.removeListener(sendHeaderListener);
+	//browser.webRequest.onHeadersReceived.removeListener(receiveHeaderListener);
 }
 
 function isBlacklisted(details) {
@@ -139,9 +191,23 @@ function isBlacklisted(details) {
 * Crawls the specified URL
 * @param {string} URL - url of the site to crawl
 */
-function crawl() {
-    // reset our current assets if we have any from the last site we crawled
-    currentAssets = [];
+function crawl(host) {
+	if (currentSiteNum === 0) {
+		browser.tabs.update({url: host}, function (tab) {
+			currentSiteNum++;
+
+			// start listening for requests
+			startRequestListeners();
+		});
+	} else {
+		console.log("navigating to " + host);
+		completedLoad = false;
+		numHeadersSent = 0;
+
+		browser.tabs.update({url: host}, function (tab) {
+			currentSiteNum++;
+		});	
+	}
 }
 
 /**
