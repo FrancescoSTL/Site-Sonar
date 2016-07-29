@@ -18314,8 +18314,9 @@ module.exports = {
 /* Global Variables */
 var blocklistSet = new Set();
 var assetLoadTimes = new Map();
-var currentAssets = [];
+var assetSentTimes = new Map();
 var lastHeaderReceivedTime = Date.now();
+var currentURL = null;
 
 /* Sherlock Resources & JS */
 const disconnectJSON = require('./data/disconnectBlacklist.json');
@@ -18339,34 +18340,35 @@ function startRequestListeners() {
 	// Listen for HTTP headers sent
 	browser.webRequest.onSendHeaders.addListener(function(details) {
 	    // if the asset is from a blacklisted url, start benchmarking by saving the asset details
-
 	    if(isBlacklisted(details)) {
-			assetLoadTimes.set(details.requestId, details);
+	    	// save the asset details in our sent Map
+			assetSentTimes.set(details.requestId, details);
 		}
 	}, {urls:["*://*/*"]});
 
 	// Listen for HTTP headers recieved
 	browser.webRequest.onHeadersReceived.addListener(function(details) {
 	    if(isBlacklisted(details)) {
-		    // get the asset details
-		    var assetDetails = assetLoadTimes.get(details.requestId);
+		    // get the asset details from the sent Map
+		    var assetDetails = assetSentTimes.get(details.requestId);
+		    // remove it from the sent Map
+		    assetSentTimes.delete(details.requestId);
 		    // set the asset complete time
 		    assetDetails.assetCompleteTime = (Date.now() - assetDetails.timeStamp);
+		    // set the host URL with no identifiable information
+		    assetDetails.originUrl = canonicalizeHost(parseURI(details.originUrl).host);
 		    // save the asset details
 		    assetLoadTimes.set(details.requestId, assetDetails);
 		}
 	}, {urls:["*://*/*"]});
 
-	// Listen for page load completion
-	browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) { 
-		if(changeInfo.status == 'complete') {
+		// Every 5 minutes, log our results to a db
+	browser.alarms.create("dbsend", {periodInMinutes: 2});
+	browser.alarms.onAlarm.addListener(function (alarm) {
+		if (alarm.name === "dbsend") {
 			console.log(assetLoadTimes);
 		}
 	});
-}
-
-function removeRequestListeners() {
-
 }
 
 function isBlacklisted(details) {
@@ -18446,15 +18448,6 @@ function isBlacklisted(details) {
 		// if none of the cases above are reached, we have an element we should block, so return true
 		return true;
 	}
-}
-
-/**
-* Crawls the specified URL
-* @param {string} URL - url of the site to crawl
-*/
-function crawl() {
-    // reset our current assets if we have any from the last site we crawled
-    currentAssets = [];
 }
 
 /**
