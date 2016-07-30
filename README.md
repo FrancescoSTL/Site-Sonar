@@ -8,7 +8,7 @@ By utilizing [Disconnect](https://disconnect.me/)'s list of ad-network domains, 
 Clone the repository by running:
 
 ```
-git clone https://github.com/FrancescoSTL/ultralightbeam.git
+git clone https://github.com/FrancescoSTL/ultra-lightbeam.git
 ```
 
 Download and install [Node.js](https://nodejs.org/en/download/)
