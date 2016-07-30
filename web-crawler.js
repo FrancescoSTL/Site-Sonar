@@ -51,7 +51,7 @@ function startRequestListeners() {
 	}, {urls:["*://*/*"]});
 
 		// Every 5 minutes, log our results to a db
-	browser.alarms.create("dbsend", {periodInMinutes: 1});
+	browser.alarms.create("dbsend", {periodInMinutes: 5});
 	browser.alarms.onAlarm.addListener(function (alarm) {
 		if (alarm.name === "dbsend") {
 			// process our Map store into a JSON string we can send via XMLHTTPRequest
