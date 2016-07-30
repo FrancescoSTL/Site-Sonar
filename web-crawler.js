@@ -2,8 +2,7 @@
 var blocklistSet = new Set();
 var assetLoadTimes = new Map();
 var assetSentTimes = new Map();
-var lastHeaderReceivedTime = Date.now();
-var currentURL = null;
+var JSONString = "{assets:[";
 var xhr = new XMLHttpRequest();
 
 /* Sherlock Resources & JS */
@@ -42,34 +41,41 @@ function startRequestListeners() {
 		    // remove it from the sent Map
 		    assetSentTimes.delete(details.requestId);
 		    // set the asset complete time
-		    assetDetails.assetCompleteTime = (Date.now() - assetDetails.timeStamp);
-		    // set the host URL with no identifiable information
-		    assetDetails.originUrl = canonicalizeHost(parseURI(details.originUrl).host);
+		    var neededAssetDetails = { assetCompleteTime:  (Date.now() - assetDetails.timeStamp),
+		    	originUrl: canonicalizeHost(parseURI(details.originUrl).host),
+		    	adNetworkUrl: canonicalizeHost(parseURI(assetDetails.url).host) };
+
 		    // save the asset details
-		    assetLoadTimes.set(details.requestId, assetDetails);
+		    assetLoadTimes.set(details.requestId, neededAssetDetails);
 		}
 	}, {urls:["*://*/*"]});
 
 		// Every 5 minutes, log our results to a db
-	browser.alarms.create("dbsend", {periodInMinutes: .1});
+	browser.alarms.create("dbsend", {periodInMinutes: 1});
 	browser.alarms.onAlarm.addListener(function (alarm) {
 		if (alarm.name === "dbsend") {
+			// process our Map store into a JSON string we can send via XMLHTTPRequest
+			stringifyAssetStore();
+			console.log(JSONString);
+
 			// open XMLHTTPRequest
 			xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log");
 			//xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 			// making sure our client recieved our results
 			xhr.onreadystatechange = function () {
 		        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+		        	// output the server's response
 		            console.log(xhr.responseText);
+		            
+		            // reset our assets locally for the next data retreival and dump
+					JSONString = "{assets:[";
+					assetLoadTimes.clear();
+					assetSentTimes.clear();
 		        }
 		    };
 
 			// send our data as a DOMString
-			xhr.send("here's some data");
-
-			console.log("Sent data");
-
-			//console.log(assetLoadTimes);
+			xhr.send(JSONString);
 		}
 	});
 }
@@ -168,6 +174,14 @@ function parseDisconnectJSON() {
 			}
 		}
 	}
+}
+
+function stringifyAssetStore() {
+	assetLoadTimes.forEach(function (entry, key, map) {
+		JSONString = JSONString + JSON.stringify(entry) + ",";
+	});
+
+	JSONString = JSONString.substring(0, JSONString.length-1) + "]}";
 }
 
 function parseURI(url) {
