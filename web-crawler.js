@@ -4,6 +4,7 @@ var assetLoadTimes = new Map();
 var assetSentTimes = new Map();
 var lastHeaderReceivedTime = Date.now();
 var currentURL = null;
+var xhr = new XMLHttpRequest();
 
 /* Sherlock Resources & JS */
 const disconnectJSON = require('./data/disconnectBlacklist.json');
@@ -50,10 +51,25 @@ function startRequestListeners() {
 	}, {urls:["*://*/*"]});
 
 		// Every 5 minutes, log our results to a db
-	browser.alarms.create("dbsend", {periodInMinutes: 5});
+	browser.alarms.create("dbsend", {periodInMinutes: .1});
 	browser.alarms.onAlarm.addListener(function (alarm) {
 		if (alarm.name === "dbsend") {
-			console.log(assetLoadTimes);
+			// open XMLHTTPRequest
+			xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log");
+			//xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+			// making sure our client recieved our results
+			xhr.onreadystatechange = function () {
+		        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+		            console.log(xhr.responseText);
+		        }
+		    };
+
+			// send our data as a DOMString
+			xhr.send("here's some data");
+
+			console.log("Sent data");
+
+			//console.log(assetLoadTimes);
 		}
 	});
 }

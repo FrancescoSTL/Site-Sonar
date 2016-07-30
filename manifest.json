@@ -21,6 +21,7 @@
     "storage",
     "webRequest",
     "webNavigation",
-    "alarms"
+    "alarms",
+    "https://ultra-lightbeam.herokuapp.com/log"
   ]
 }
