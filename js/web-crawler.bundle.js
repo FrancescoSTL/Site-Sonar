@@ -18314,8 +18314,11 @@ module.exports = {
 /* Global Variables */
 var blocklistSet = new Set();
 var assetLoadTimes = new Map();
-var currentAssets = [];
+var assetSentTimes = new Map();
 var lastHeaderReceivedTime = Date.now();
+var currentURL = null;
+var JSONString = "{assets:[";
+var xhr = new XMLHttpRequest();
 
 /* Sherlock Resources & JS */
 const disconnectJSON = require('./data/disconnectBlacklist.json');
@@ -18339,34 +18342,53 @@ function startRequestListeners() {
 	// Listen for HTTP headers sent
 	browser.webRequest.onSendHeaders.addListener(function(details) {
 	    // if the asset is from a blacklisted url, start benchmarking by saving the asset details
-
 	    if(isBlacklisted(details)) {
-			assetLoadTimes.set(details.requestId, details);
+	    	// save the asset details in our sent Map
+			assetSentTimes.set(details.requestId, details);
 		}
 	}, {urls:["*://*/*"]});
 
 	// Listen for HTTP headers recieved
 	browser.webRequest.onHeadersReceived.addListener(function(details) {
 	    if(isBlacklisted(details)) {
-		    // get the asset details
-		    var assetDetails = assetLoadTimes.get(details.requestId);
+		    // get the asset details from the sent Map
+		    var assetDetails = assetSentTimes.get(details.requestId);
+		    // remove it from the sent Map
+		    assetSentTimes.delete(details.requestId);
 		    // set the asset complete time
-		    assetDetails.assetCompleteTime = (Date.now() - assetDetails.timeStamp);
+		    var neededAssetDetails = { assetCompleteTime:  (Date.now() - assetDetails.timeStamp), 
+		    		originUrl: canonicalizeHost(parseURI(details.originUrl).host),
+		    		adNetworkUrl: canonicalizeHost(parseURI(assetDetails.url).host) };
+
 		    // save the asset details
-		    assetLoadTimes.set(details.requestId, assetDetails);
+		    assetLoadTimes.set(details.requestId, neededAssetDetails);
 		}
 	}, {urls:["*://*/*"]});
 
-	// Listen for page load completion
-	browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) { 
-		if(changeInfo.status == 'complete') {
-			console.log(assetLoadTimes);
+		// Every 5 minutes, log our results to a db
+	browser.alarms.create("dbsend", {periodInMinutes: .1});
+	browser.alarms.onAlarm.addListener(function (alarm) {
+		if (alarm.name === "dbsend") {
+			// process our Map store into a JSON string we can send via XMLHTTPRequest
+			stringifyAssetStore();
+			console.log(JSONString);
+
+			// open XMLHTTPRequest
+			xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log");
+			//xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+			// making sure our client recieved our results
+			xhr.onreadystatechange = function () {
+		        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+		            console.log(xhr.responseText);
+		        }
+		    };
+
+			// send our data as a DOMString
+			xhr.send(JSONString);
+
+			//console.log(assetLoadTimes);
 		}
 	});
-}
-
-function removeRequestListeners() {
-
 }
 
 function isBlacklisted(details) {
@@ -18449,15 +18471,6 @@ function isBlacklisted(details) {
 }
 
 /**
-* Crawls the specified URL
-* @param {string} URL - url of the site to crawl
-*/
-function crawl() {
-    // reset our current assets if we have any from the last site we crawled
-    currentAssets = [];
-}
-
-/**
 * Parses our disconnect JSON into a set of blacklisted hostname + subdomain urls
 */
 function parseDisconnectJSON() {
@@ -18472,6 +18485,14 @@ function parseDisconnectJSON() {
 			}
 		}
 	}
+}
+
+function stringifyAssetStore() {
+	assetLoadTimes.forEach(function (entry, key, map) {
+		JSONString = JSONString + JSON.stringify(entry) + ",";
+	});
+
+	JSONString = JSONString.substring(0, JSONString.length-1) + "]}";
 }
 
 function parseURI(url) {

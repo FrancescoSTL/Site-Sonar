@@ -20,6 +20,8 @@
   "permissions": [
     "storage",
     "webRequest",
-    "webNavigation"
+    "webNavigation",
+    "alarms",
+    "https://ultra-lightbeam.herokuapp.com/log"
   ]
 }
