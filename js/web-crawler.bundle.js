@@ -18364,12 +18364,11 @@ function startRequestListeners() {
 	}, {urls:["*://*/*"]});
 
 		// Every 5 minutes, log our results to a db
-	browser.alarms.create("dbsend", {periodInMinutes: .5});
+	browser.alarms.create("dbsend", {periodInMinutes: 5});
 	browser.alarms.onAlarm.addListener(function (alarm) {
-		if (alarm.name === "dbsend") {
+		if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
 			// process our Map store into a JSON string we can send via XMLHTTPRequest
 			stringifyAssetStore();
-			// remove all newline characters
 			console.log(JSONString);
 
 			// open XMLHTTPRequest
