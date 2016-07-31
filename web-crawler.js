@@ -2,7 +2,7 @@
 var blocklistSet = new Set();
 var assetLoadTimes = new Map();
 var assetSentTimes = new Map();
-var JSONString = "{assets:[";
+var JSONString = "{\"assets\":[";
 var xhr = new XMLHttpRequest();
 
 /* Sherlock Resources & JS */
@@ -53,14 +53,14 @@ function startRequestListeners() {
 		// Every 5 minutes, log our results to a db
 	browser.alarms.create("dbsend", {periodInMinutes: 5});
 	browser.alarms.onAlarm.addListener(function (alarm) {
-		if (alarm.name === "dbsend") {
+		if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
 			// process our Map store into a JSON string we can send via XMLHTTPRequest
 			stringifyAssetStore();
 			console.log(JSONString);
 
 			// open XMLHTTPRequest
-			xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log");
-			//xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+			xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/");
+			xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 			// making sure our client recieved our results
 			xhr.onreadystatechange = function () {
 		        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -68,7 +68,7 @@ function startRequestListeners() {
 		            console.log(xhr.responseText);
 		            
 		            // reset our assets locally for the next data retreival and dump
-					JSONString = "{assets:[";
+					JSONString = "{\"assets\":[";
 					assetLoadTimes.clear();
 					assetSentTimes.clear();
 		        }
