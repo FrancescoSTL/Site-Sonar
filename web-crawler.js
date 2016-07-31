@@ -24,6 +24,7 @@ parseDisconnectJSON();
 startRequestListeners();
 
 function startRequestListeners() {
+
 	// Listen for HTTP headers sent
 	browser.webRequest.onSendHeaders.addListener(function(details) {
 	    // if the asset is from a blacklisted url, start benchmarking by saving the asset details
@@ -185,15 +186,19 @@ function stringifyAssetStore() {
 }
 
 function parseURI(url) {
-    var match = url.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
-    return match && {
-        protocol: match[1],
-        host: match[2],
-        hostname: match[3],
-        port: match[4],
-        pathname: match[5],
-        search: match[6],
-        hash: match[7]
+	if (url) {
+	    var match = url.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+	    return match && {
+	        protocol: match[1],
+	        host: match[2],
+	        hostname: match[3],
+	        port: match[4],
+	        pathname: match[5],
+	        search: match[6],
+	        hash: match[7]
+	    }
+    } else {
+    	return null;
     }
 }
 
