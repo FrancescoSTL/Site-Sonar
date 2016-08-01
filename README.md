@@ -1,5 +1,3 @@
-![Ultra-Lightbeam Banner](https://cloud.githubusercontent.com/assets/9794516/17311436/345a3c22-5800-11e6-8aec-ee0644d7023d.png)
-
 # Ultra-Lightbeam
 A web extension used to identify ad networks with the slowest loading content on the internet; built as an ultra-light sister-project of of [Lightbeam](https://github.com/mozilla/lightbeam). 
 
@@ -39,4 +37,6 @@ OR
 
 ## Interpreting Results
 
-After Ultra-Lightbeam does its thing, ad content load speed will be logged to the console for now. To view, open the web-console in Firefox and filter for only "logging" items.
+After Ultra-Lightbeam does its thing, ad content load speed will be logged to the [Ultra-Lightbeam Dashboard](http://ultra-lightbeam.com). Keep checking back for dashboard updates!
+
+![Ultra-Lightbeam Banner](https://cloud.githubusercontent.com/assets/9794516/17311436/345a3c22-5800-11e6-8aec-ee0644d7023d.png)
