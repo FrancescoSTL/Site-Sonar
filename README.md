@@ -1,3 +1,5 @@
+![Ultra-Lightbeam Banner](https://cloud.githubusercontent.com/assets/9794516/17311436/345a3c22-5800-11e6-8aec-ee0644d7023d.png)
+
 # Ultra-Lightbeam
 A web extension used to identify ad networks with the slowest loading content on the internet; built as an ultra-light sister-project of of [Lightbeam](https://github.com/mozilla/lightbeam). 
 
