@@ -27,7 +27,6 @@ startRequestListeners();
 function startRequestListeners() {
 	// Listen for HTTP headers sent
 	browser.webRequest.onSendHeaders.addListener(function(details) {
-
 	    // if the asset is from a blacklisted url, start benchmarking by saving the asset details
 	    if(isBlacklisted(details)) {
 	    	// save the asset details in our sent Map
@@ -58,7 +57,6 @@ function startRequestListeners() {
 		if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
 			// process our Map store into a JSON string we can send via XMLHTTPRequest
 			stringifyAssetStore();
-			console.log(JSONString);
 
 			// open XMLHTTPRequest
 			xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/");

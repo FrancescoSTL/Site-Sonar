@@ -18340,7 +18340,6 @@ startRequestListeners();
 function startRequestListeners() {
 	// Listen for HTTP headers sent
 	browser.webRequest.onSendHeaders.addListener(function(details) {
-
 	    // if the asset is from a blacklisted url, start benchmarking by saving the asset details
 	    if(isBlacklisted(details)) {
 	    	// save the asset details in our sent Map
@@ -18371,7 +18370,6 @@ function startRequestListeners() {
 		if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
 			// process our Map store into a JSON string we can send via XMLHTTPRequest
 			stringifyAssetStore();
-			console.log(JSONString);
 
 			// open XMLHTTPRequest
 			xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/");
@@ -18475,13 +18473,11 @@ function isBlacklisted(details) {
 					break;
 				}
 			}
-			console.log(mainFrameOriginTopHosts[requestTabID]);
 
 			// check to see if the origin is a property of the entity
 			for (var requestMainFame of allHosts(mainFrameOriginTopHosts[requestTabID])) {
 				mainFrameOriginIsEntityProperty = entity.properties.indexOf(mainFrameOriginTopHosts[requestTabID]) > -1;
 				if(mainFrameOriginIsEntityProperty) {
-					console.log("main frame is entity property");
 					break;
 				}
 			}
