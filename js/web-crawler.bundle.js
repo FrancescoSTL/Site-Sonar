@@ -18348,20 +18348,43 @@ function startRequestListeners() {
 
 	// Listen for HTTP headers recieved
 	browser.webRequest.onHeadersReceived.addListener(function(details) {
-	    if(isBlacklisted(details)) {
+	    if(assetSentTimes.get(details.requestId)) {
 		    // get the asset details from the sent Map
 		    var assetDetails = assetSentTimes.get(details.requestId);
+		    var assetAdHost = canonicalizeHost(parseURI(assetDetails.url).host);
+		    var assetBenchmark = (Date.now() - assetDetails.timeStamp);
+		    var assetOriginUrl = canonicalizeHost(parseURI(details.originUrl).host);
+		    var asset
+		    var assetSize;
+		    var assetAdNetwork;
+
+		    // get the size of the asset we loaded
+		    details.responseHeaders.forEach(function(headItem){
+		        if(headItem.name == 'Content-Length') {
+		            assetSize = headItem.value;
+		        }
+		    });
+
+		    //get the ad network for the ad host in our request
+		    assetAdNetwork = getAdNetwork(assetAdHost);
+
 		    // remove it from the sent Map
 		    assetSentTimes.delete(details.requestId);
 		    // set the asset complete time
-		    var neededAssetDetails = { assetCompleteTime:  (Date.now() - assetDetails.timeStamp),
-		    	originUrl: canonicalizeHost(parseURI(details.originUrl).host),
-		    	adNetworkUrl: canonicalizeHost(parseURI(assetDetails.url).host) };
+		    var neededAssetDetails = { assetCompleteTime: assetBenchmark,
+		    	originUrl: assetOriginUrl,
+		    	adNetworkUrl: assetAdHost,
+		    	assetType: details.type,
+		    	fileSize: assetSize || "-",
+		    	timeStamp: details.timeStamp,
+		    	method: details.method,
+		    	statusCode: details.statusCode,
+		    	adNetwork: assetAdNetwork };
 
 		    // save the asset details
 		    assetLoadTimes.set(details.requestId, neededAssetDetails);
 		}
-	}, {urls:["*://*/*"]});
+	}, {urls:["*://*/*"]}, ["responseHeaders"]);
 
 		// Every 5 minutes, log our results to a db
 	browser.alarms.create("dbsend", {periodInMinutes: 5});
@@ -18369,7 +18392,6 @@ function startRequestListeners() {
 		if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
 			// process our Map store into a JSON string we can send via XMLHTTPRequest
 			stringifyAssetStore();
-			console.log(JSONString);
 
 			// open XMLHTTPRequest
 			xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/");
@@ -18476,17 +18498,46 @@ function isBlacklisted(details) {
 * Parses our disconnect JSON into a set of blacklisted hostname + subdomain urls
 */
 function parseDisconnectJSON() {
+	// remove un-needed categories per disconnect
+	delete disconnectJSON.categories['Content']
+	delete disconnectJSON.categories['Legacy Disconnect']
+	delete disconnectJSON.categories['Legacy Content']
+
 	// parse our disconnect JSON into a set where we only include the hostname and subdomain urls
-	for(var category in disconnectJSON.categories.Advertising) {
-		for(var network in disconnectJSON.categories.Advertising[category]) {
-			for(var hostname in disconnectJSON.categories.Advertising[category][network]) {
+	for(var category in disconnectJSON.categories) {
+		for(var network in disconnectJSON.categories[category]) {
+			for(var hostname in disconnectJSON.categories[category][network]) {
 				blocklistSet.add(hostname);
-				for(var subDomain in disconnectJSON.categories.Advertising[category][network][hostname]) {
-					blocklistSet.add(disconnectJSON.categories.Advertising[category][network][hostname][subDomain]);
+				for(var subDomain in disconnectJSON.categories[category][network][hostname]) {
+					for(var entitySubDomain in disconnectJSON.categories[category][network][hostname][subDomain]) {
+						blocklistSet.add(disconnectJSON.categories[category][network][hostname][subDomain][entitySubDomain]);
+					}
 				}
 			}
 		}
 	}
+}
+
+function getAdNetwork(assetAdHost) {
+	var assetAdNetwork;
+
+	// parse our disconnect JSON into a set where we only include the hostname and subdomain urls
+	for(var category in disconnectJSON.categories) {
+		for(var network in disconnectJSON.categories[category]) {
+			for(var hostname in disconnectJSON.categories[category][network]) {
+				for(var subDomain in disconnectJSON.categories[category][network][hostname]) {
+					for(var entitySubDomain in disconnectJSON.categories[category][network][hostname][subDomain]) {
+						if (assetAdHost.includes(disconnectJSON.categories[category][network][hostname][subDomain][entitySubDomain])) {
+							assetAdNetwork = Object.keys(disconnectJSON.categories[category][network])[0];
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return assetAdNetwork;
 }
 
 function stringifyAssetStore() {
@@ -18498,15 +18549,19 @@ function stringifyAssetStore() {
 }
 
 function parseURI(url) {
-    var match = url.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
-    return match && {
-        protocol: match[1],
-        host: match[2],
-        hostname: match[3],
-        port: match[4],
-        pathname: match[5],
-        search: match[6],
-        hash: match[7]
+	if (url) {
+	    var match = url.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+	    return match && {
+	        protocol: match[1],
+	        host: match[2],
+	        hostname: match[3],
+	        port: match[4],
+	        pathname: match[5],
+	        search: match[6],
+	        hash: match[7]
+	    }
+    } else {
+    	return null;
     }
 }
 
