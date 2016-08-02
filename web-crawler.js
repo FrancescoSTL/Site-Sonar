@@ -4,7 +4,6 @@ var assetLoadTimes = new Map();
 var assetSentTimes = new Map();
 var mainFrameOriginTopHosts = {};
 var JSONString = "{\"assets\":[";
-var xhr = new XMLHttpRequest();
 
 /* Sherlock Resources & JS */
 const disconnectJSON = require('./data/disconnectBlacklist.json');
@@ -77,6 +76,9 @@ function startRequestListeners() {
 		// Every 5 minutes, log our results to a db
 	browser.alarms.create("dbsend", {periodInMinutes: 5});
 	browser.alarms.onAlarm.addListener(function (alarm) {
+		// initialize our xmlhttprequest
+		var xhr = new XMLHttpRequest();
+
 		if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
 			// process our Map store into a JSON string we can send via XMLHTTPRequest
 			stringifyAssetStore();
