@@ -2,6 +2,7 @@
 var blocklistSet = new Set();
 var assetLoadTimes = new Map();
 var assetSentTimes = new Map();
+var mainFrameOriginTopHosts = {};
 var JSONString = "{\"assets\":[";
 var xhr = new XMLHttpRequest();
 
@@ -100,17 +101,29 @@ function startRequestListeners() {
 			xhr.send(JSONString);
 		}
 	});
+
+	// listen for a change in the open tabs so we can grab all currently open tabs
+	browser.tabs.onUpdated.addListener(function (tabID, changeInfo) {
+		if (changeInfo.status === 'loading') {
+			 mainFrameOriginTopHosts[tabID] = null;
+		}
+	});
 }
 
 function isBlacklisted(details) {
 	var privlegedOrigin = false;
 	var hostinBlocklist = false;
 	var requestHostMatchesMainFrame = false;
+	var requestTabID = details.tabId;
 	var requestEntityName;
 	
 	// canonicalize the origin address
 	var unparsedOrigin = parseURI(details.originUrl).host;
 	origin = canonicalizeHost(unparsedOrigin);
+
+	if (details.frameId === 0) {
+    	mainFrameOriginTopHosts[requestTabID] = origin;
+	}
 
 	// if it is originating from firefox, new window, or newtab, it is definitely not blacklisted
 	privlegedOrigin = ((typeof origin !== 'undefined' && origin.includes('moz-nullprincipal')) || origin === '');
@@ -139,7 +152,7 @@ function isBlacklisted(details) {
 	// if it is a third party request
 	if (origin !== host) {
 		// if it is a request to the main frame from a sub frame
-		requestHostMatchesMainFrame = details.frameId > 0;
+		requestHostMatchesMainFrame = (details.frameId > 0 && host === mainFrameOriginTopHosts[requestTabID]);
       	if (requestHostMatchesMainFrame) {
       		// we should allow it, so return false
         	return false;
@@ -150,6 +163,7 @@ function isBlacklisted(details) {
 			var entity = disconnectEntitylist[entityName];
 			var requestIsEntityResource = false;
 			var originIsEntityProperty = false;
+			var mainFrameOriginIsEntityProperty = false;
 
 			// check if the host is a resource of the entity
 			for (var requestHost of allHosts(host)) {
@@ -170,8 +184,16 @@ function isBlacklisted(details) {
 				}
 			}
 
+			// check to see if the origin is a property of the entity
+			for (var requestMainFame of allHosts(mainFrameOriginTopHosts[requestTabID])) {
+				mainFrameOriginIsEntityProperty = entity.properties.indexOf(mainFrameOriginTopHosts[requestTabID]) > -1;
+				if(mainFrameOriginIsEntityProperty) {
+					break;
+				}
+			}
+
 			// if our origin is a property and host is a resource of the entity, return false
-			if (originIsEntityProperty && requestIsEntityResource) {
+			if ((originIsEntityProperty || mainFrameOriginIsEntityProperty) && requestIsEntityResource) {
 				return false;
 			}
 		}
