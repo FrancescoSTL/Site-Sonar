@@ -62,7 +62,7 @@ function startRequestListeners() {
 		    	originUrl: assetOriginUrl,
 		    	adNetworkUrl: assetAdHost,
 		    	assetType: details.type,
-		    	fileSize: assetSize || null,
+		    	fileSize: parseInt(assetSize) || null,
 		    	timeStamp: details.timeStamp,
 		    	method: details.method,
 		    	statusCode: details.statusCode,
