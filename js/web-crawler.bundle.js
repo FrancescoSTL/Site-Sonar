@@ -18351,9 +18351,9 @@ function startRequestListeners() {
 	    if(assetSentTimes.get(details.requestId)) {
 		    // get the asset details from the sent Map
 		    var assetDetails = assetSentTimes.get(details.requestId);
-		    var assetAdHost = canonicalizeHost(parseURI(assetDetails.url).host);
+		    var assetAdHost = canonicalizeHost(parseURI(assetDetails.url).hostname);
 		    var assetBenchmark = (Date.now() - assetDetails.timeStamp);
-		    var assetOriginUrl = canonicalizeHost(parseURI(details.originUrl).host);
+		    var assetOriginUrl = canonicalizeHost(parseURI(details.originUrl).hostname);
 		    var asset
 		    var assetSize;
 		    var assetAdNetwork;
@@ -18365,8 +18365,8 @@ function startRequestListeners() {
 		        }
 		    });
 
+		    // filter out all 0's as nulls, and parse all non-zero filesizes as integers
 		    assetSize = (parseInt(assetSize) === 0 || !parseInt(assetSize)) ? null : parseInt(assetSize);
-		    console.log(assetSize);
 
 		    //get the ad network for the ad host in our request
 		    assetAdNetwork = getAdNetwork(assetAdHost);
@@ -18436,7 +18436,7 @@ function isBlacklisted(details) {
 	var requestEntityName;
 	
 	// canonicalize the origin address
-	var unparsedOrigin = parseURI(details.originUrl).host;
+	var unparsedOrigin = parseURI(details.originUrl).hostname;
 	origin = canonicalizeHost(unparsedOrigin);
 
 	if (details.frameId === 0) {
@@ -18451,7 +18451,7 @@ function isBlacklisted(details) {
 	}
 
 	// canoniocalize the host address
-	var unparsedHost = parseURI(details.url).host;
+	var unparsedHost = parseURI(details.url).hostname;
 	host = canonicalizeHost(unparsedHost);
     // check if any host from lowest-level to top-level is in the blocklist
     var allRequestHosts = allHosts(host);
@@ -18576,20 +18576,16 @@ function stringifyAssetStore() {
 }
 
 function parseURI(url) {
-	if (url) {
-	    var match = url.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
-	    return match && {
-	        protocol: match[1],
-	        host: match[2],
-	        hostname: match[3],
-	        port: match[4],
-	        pathname: match[5],
-	        search: match[6],
-	        hash: match[7]
-	    }
-    } else {
-    	return null;
-    }
+	var match = url.match(/^((https|http)?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+	return match && {
+	    protocol: match[1],
+	    host: match[2],
+	    hostname: match[3],
+	    port: match[4],
+	    pathname: match[5],
+	    search: match[6],
+	    hash: match[7]
+	}
 }
 
 
