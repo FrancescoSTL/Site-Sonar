@@ -22,9 +22,11 @@ Once you've cloned the repo and installed Node.js, you can start Ultra-Lightbeam
 
 ### With `web-ext`
 
+If you're using web-ext, you'll need to do so with a pre-release version of Firefox for now, as it is only supported in Firefox 49 or higher.
+
 3. [Install `web-ext`](https://github.com/mozilla/web-ext/#documentation) if
    you haven't already
-4. `web-ext run`
+4. `web-ext run --firefox-binary=/Path/to/your/FirefoxDeveloperEdition/or/FirefoxBeta/or/FirefoxNightly.app`
 
 OR
 

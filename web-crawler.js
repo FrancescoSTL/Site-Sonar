@@ -52,6 +52,9 @@ function startRequestListeners() {
 		        }
 		    });
 
+		    // filter out all 0's as nulls, and parse all non-zero filesizes as integers
+		    assetSize = (parseInt(assetSize) === 0 || !parseInt(assetSize)) ? null : parseInt(assetSize);
+
 		    //get the ad network for the ad host in our request
 		    assetAdNetwork = getAdNetwork(assetAdHost);
 
@@ -62,7 +65,7 @@ function startRequestListeners() {
 		    	originUrl: assetOriginUrl,
 		    	adNetworkUrl: assetAdHost,
 		    	assetType: details.type,
-		    	fileSize: parseInt(assetSize) || null,
+		    	fileSize: assetSize,
 		    	timeStamp: details.timeStamp,
 		    	method: details.method,
 		    	statusCode: details.statusCode,
