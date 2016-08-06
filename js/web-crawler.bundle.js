@@ -18317,6 +18317,7 @@ var assetLoadTimes = new Map();
 var assetSentTimes = new Map();
 var mainFrameOriginTopHosts = {};
 var JSONString = "{\"assets\":[";
+var currentPage;
 
 /* Sherlock Resources & JS */
 const disconnectJSON = require('./data/disconnectBlacklist.json');
@@ -18384,6 +18385,13 @@ function startRequestListeners() {
                 statusCode: details.statusCode,
                 adNetwork: assetAdNetwork };
 
+            chrome.storage.local.get({ assetBenchmarks: [] }, function (loadTimes) {
+            	var assetBenchmarks = loadTimes.assetBenchmarks;
+            	assetBenchmarks.push(neededAssetDetails);
+
+            	chrome.storage.local.set({ assetBenchmarks });
+            });
+
             // save the asset details
             assetLoadTimes.set(details.requestId, neededAssetDetails);
         }
@@ -18424,6 +18432,9 @@ function startRequestListeners() {
     browser.tabs.onUpdated.addListener(function (tabID, changeInfo) {
         if (changeInfo.status === 'loading') {
             mainFrameOriginTopHosts[tabID] = null;
+        } else if (changeInfo.status === 'complete' && changeInfo.url !== currentPage) {
+            chrome.storage.local.remove('assetBenchmarks');
+            currentPage = changeInfo.url;
         }
     });
 }
