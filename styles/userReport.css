@@ -1,0 +1,16 @@
+body {
+	overflow: scroll;
+	height: 600px;
+}
+
+#userData td {
+	padding: 0 10px;
+}
+
+.selected {
+	font-weight: bold;
+}
+
+.menu a {
+	margin: 0px 10px;
+}
