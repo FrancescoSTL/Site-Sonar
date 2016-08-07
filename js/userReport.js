@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var reportSize = document.getElementById('dataUsed');
     var newTable;
     
-    newTable = "<table id=\"#userData\"><tr><th>Origin</th><th>Ad Network</th><th>File Type</th><th>File Size</th><th>Load Time</th></tr>";
+    newTable = "<table id=\"#userData\"><tr><th align=\"left\">Origin</th><th align=\"left\">Ad Network</th><th align=\"left\">File Type</th><th align=\"left\">File Size</th><th align=\"left\">Load Time</th></tr>";
 
     chrome.storage.local.get('assetBenchmarks', function (result) {
         if(typeof result.assetBenchmarks !== 'undefined')  {
