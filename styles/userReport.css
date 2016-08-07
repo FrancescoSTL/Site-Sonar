@@ -1,7 +1,14 @@
 body {
+	font-family: "Helvetica";
 	overflow: scroll;
 	height: 600px;
-	width: 500px;
+	width: 600px;
+	padding: 30px;
+}
+
+h1 {
+	font-weight: 300;
+	color: #9c56b8;
 }
 
 #userData {
@@ -10,13 +17,25 @@ body {
 
 #userData th {
 	width: 20%;
-	padding: 0 10px;
+}
+
+#outputArea {
+	margin-bottom: 10px;
+}
+
+#sendRadio {
+	margin-bottom: 10px;
 }
 
 .selected {
 	font-weight: bold;
 }
 
+.menu {
+	margin-bottom: 20px;
+}
+
 .menu a {
-	margin: 0px 10px;
+	margin-right: 10px;
+	display: inline-block;
 }
