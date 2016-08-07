@@ -1,9 +1,15 @@
 body {
 	overflow: scroll;
 	height: 600px;
+	width: 500px;
 }
 
-#userData td {
+#userData {
+	width: 100%;
+}
+
+#userData th {
+	width: 20%;
 	padding: 0 10px;
 }
 

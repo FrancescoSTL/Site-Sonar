@@ -94,32 +94,40 @@ function startRequestListeners() {
         // Every 5 minutes, log our results to a db
     browser.alarms.create("dbsend", {periodInMinutes: 5});
     browser.alarms.onAlarm.addListener(function (alarm) {
-        // initialize our xmlhttprequest
-        var xhr = new XMLHttpRequest();
+        // get user-set sendData preference
+        chrome.storage.local.get('sendData', function (result) {
+            var sendData = result.sendData;
 
-        if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
-            // process our Map store into a JSON string we can send via XMLHTTPRequest
-            stringifyAssetStore();
+            // if they want to send their data (default)
+            if (sendData) {
+                // initialize our xmlhttprequest
+                var xhr = new XMLHttpRequest();
 
-            // open XMLHTTPRequest
-            xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/");
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            // making sure our client recieved our results
-            xhr.onreadystatechange = function () {
-                if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                    // output the server's response
-                    console.log(xhr.responseText);
-                    
-                    // reset our assets locally for the next data retreival and dump
-                    JSONString = "{\"assets\":[";
-                    assetLoadTimes.clear();
-                    assetSentTimes.clear();
+                if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
+                    // process our Map store into a JSON string we can send via XMLHTTPRequest
+                    stringifyAssetStore();
+
+                    // open XMLHTTPRequest
+                    xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/");
+                    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    // making sure our client recieved our results
+                    xhr.onreadystatechange = function () {
+                        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                            // output the server's response
+                            console.log(xhr.responseText);
+                            
+                            // reset our assets locally for the next data retreival and dump
+                            JSONString = "{\"assets\":[";
+                            assetLoadTimes.clear();
+                            assetSentTimes.clear();
+                        }
+                    };
+
+                    // send our data as a DOMString
+                    xhr.send(JSONString);
                 }
-            };
-
-            // send our data as a DOMString
-            xhr.send(JSONString);
-        }
+            }
+        });
     });
 
     // listen for a change in the open tabs so we can grab all currently open tabs
