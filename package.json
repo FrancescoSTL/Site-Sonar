@@ -1,5 +1,5 @@
 {
-  "name": "sherlock",
+  "name": "ultra-lightbeam",
   "version": "0.0.1",
   "description": "Investigating the worst players in slow-loading advertisements on the web.",
   "main": "web-crawler.bundle.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FrancescoSTL/sherlock"
+    "url": "git+https://github.com/FrancescoSTL/Ultra-Lightbeam"
   },
   "author": "Francesco Polizzi",
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/FrancescoSTL/sherlock/issues"
+    "url": "https://github.com/FrancescoSTL/Ultra-Lightbeam/issues"
   },
-  "homepage": "https://github.com/FrancescoSTL/sherlock#readme",
+  "homepage": "https://github.com/FrancescoSTL/Ultra-Lightbeam#readme",
   "devDependencies": {
     "browserify": "13.0.1",
     "web-ext": "1.3.0"

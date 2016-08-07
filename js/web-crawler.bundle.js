@@ -18384,6 +18384,13 @@ function startRequestListeners() {
                 statusCode: details.statusCode,
                 adNetwork: assetAdNetwork };
 
+            chrome.storage.local.get({ assetBenchmarks: [] }, function (loadTimes) {
+            	var assetBenchmarks = loadTimes.assetBenchmarks;
+            	assetBenchmarks.push(neededAssetDetails);
+
+            	chrome.storage.local.set({ assetBenchmarks });
+            });
+
             // save the asset details
             assetLoadTimes.set(details.requestId, neededAssetDetails);
         }

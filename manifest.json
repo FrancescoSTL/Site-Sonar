@@ -2,9 +2,9 @@
 {
   "description": "Investigating the worst players in slow-loading advertisements on the web.",
   "manifest_version": 2,
-  "name": "sherlock",
+  "name": "ultra-lightbeam",
   "version": "0.1",
-  "homepage_url": "https://github.com/FrancescoSTL/sherlock",
+  "homepage_url": "https://github.com/FrancescoSTL/Ultra-Lightbeam",
   "icons": {
     "48": "icons/border-48.png"
   },
@@ -13,9 +13,14 @@
   },
   "applications": {
     "gecko": {
-      "id": "sherlock@mozilla.org",
+      "id": "ultra-lightbeam@mozilla.org",
       "strict_min_version": "45.0"
     }
+  },
+  "browser_action": {
+   "default_icon": "icons/border-48.png",
+   "default_title": "Ultra-Lightbeam Dashboard",
+   "default_popup": "views/userReport.html"
   },
   "permissions": [
     "storage",
