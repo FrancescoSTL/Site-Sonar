@@ -18373,26 +18373,34 @@ function startRequestListeners() {
 
             // remove it from the sent Map
             assetSentTimes.delete(details.requestId);
-            // set the asset complete time
-            var neededAssetDetails = { assetCompleteTime: assetBenchmark,
-                originUrl: assetOriginUrl,
-                adNetworkUrl: assetAdHost,
-                assetType: details.type,
-                fileSize: assetSize,
-                timeStamp: details.timeStamp,
-                method: details.method,
-                statusCode: details.statusCode,
-                adNetwork: assetAdNetwork };
+            
+            browser.tabs.get(details.tabId, function (tab) {
+                var host = canonicalizeHost(parseURI(tab.url).hostname);
 
-            chrome.storage.local.get({ assetBenchmarks: [] }, function (loadTimes) {
-            	var assetBenchmarks = loadTimes.assetBenchmarks;
-            	assetBenchmarks.push(neededAssetDetails);
+                // set the asset complete time
+                var neededAssetDetails = { assetCompleteTime: assetBenchmark,
+                    originUrl: assetOriginUrl,
+                    hostUrl: host,
+                    adNetworkUrl: assetAdHost,
+                    assetType: details.type,
+                    fileSize: assetSize,
+                    timeStamp: details.timeStamp,
+                    method: details.method,
+                    statusCode: details.statusCode,
+                    adNetwork: assetAdNetwork };
 
-            	chrome.storage.local.set({ assetBenchmarks });
+                chrome.storage.local.get({ assetBenchmarks: [] }, function (loadTimes) {
+                    var assetBenchmarks = loadTimes.assetBenchmarks;
+                    assetBenchmarks.push(neededAssetDetails);
+
+                    chrome.storage.local.set({ assetBenchmarks });
+                });
+
+                // save the asset details
+                assetLoadTimes.set(details.requestId, neededAssetDetails);
+
+                console.log(neededAssetDetails);
             });
-
-            // save the asset details
-            assetLoadTimes.set(details.requestId, neededAssetDetails);
         }
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 

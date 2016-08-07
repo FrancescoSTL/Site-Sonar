@@ -27,6 +27,7 @@
     "webRequest",
     "webNavigation",
     "alarms",
+    "tabs",
     "https://ultra-lightbeam.herokuapp.com/log"
   ]
 }
