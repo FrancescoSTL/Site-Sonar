@@ -85,14 +85,12 @@ function startRequestListeners() {
 
                 // save the asset details
                 assetLoadTimes.set(details.requestId, neededAssetDetails);
-
-                console.log(neededAssetDetails);
             });
         }
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 
         // Every 5 minutes, log our results to a db
-    browser.alarms.create("dbsend", {periodInMinutes: 5});
+    browser.alarms.create("dbsend", {periodInMinutes: 1});
     browser.alarms.onAlarm.addListener(function (alarm) {
         // get user-set sendData preference
         chrome.storage.local.get('sendData', function (result) {
@@ -120,6 +118,9 @@ function startRequestListeners() {
                             JSONString = "{\"assets\":[";
                             assetLoadTimes.clear();
                             assetSentTimes.clear();
+
+                            // restart our timer
+                            browser.alarms.create("dbsend", {periodInMinutes: 1});
                         }
                     };
 
