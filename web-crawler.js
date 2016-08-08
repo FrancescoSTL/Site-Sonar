@@ -90,14 +90,14 @@ function startRequestListeners() {
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 
         // Every 5 minutes, log our results to a db
-    browser.alarms.create("dbsend", {periodInMinutes: 1});
+    browser.alarms.create("dbsend", {periodInMinutes: 2});
     browser.alarms.onAlarm.addListener(function (alarm) {
         // get user-set sendData preference
         chrome.storage.local.get('sendData', function (result) {
             var sendData = result.sendData;
 
             // if they want to send their data (default)
-            if (sendData) {
+            if (sendData || typeof result.sendData === 'undefined') {
                 // initialize our xmlhttprequest
                 var xhr = new XMLHttpRequest();
 
@@ -118,9 +118,6 @@ function startRequestListeners() {
                             JSONString = "{\"assets\":[";
                             assetLoadTimes.clear();
                             assetSentTimes.clear();
-
-                            // restart our timer
-                            browser.alarms.create("dbsend", {periodInMinutes: 1});
                         }
                     };
 
