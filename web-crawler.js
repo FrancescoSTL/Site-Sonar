@@ -124,6 +124,11 @@ function startRequestListeners() {
                     // send our data as a DOMString
                     xhr.send(JSONString);
                 }
+            } else {
+                // reset our assets locally so that memory build up doesn't happen
+                JSONString = "{\"assets\":[";
+                assetLoadTimes.clear();
+                assetSentTimes.clear();
             }
         });
     });
