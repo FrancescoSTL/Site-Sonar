@@ -18331,30 +18331,38 @@ startRequestListeners();
 
 function startRequestListeners() {
     // Listen for HTTP headers sent
-    browser.webRequest.onSendHeaders.addListener(function(details) {
+    chrome.webRequest.onSendHeaders.addListener(function(details) {
+        details.requestHeaders.forEach( function(headItem) {
+            if (headItem.name === "Referer") {
+                details.originUrl = headItem.value;
+            }
+        });
+        
         // if the asset is from a blacklisted url, start benchmarking by saving the asset details
         if(isBlacklisted(details)) {
             // save the asset details in our sent Map
             assetSentTimes.set(details.requestId, details);
         }
-    }, {urls:["*://*/*"]});
+    }, {urls:["*://*/*"]}, ["requestHeaders"]);
 
     // Listen for HTTP headers recieved
-    browser.webRequest.onHeadersReceived.addListener(function(details) {
+    chrome.webRequest.onHeadersReceived.addListener(function(details) {
         if(assetSentTimes.get(details.requestId)) {
             // get the asset details from the sent Map
             var assetDetails = assetSentTimes.get(details.requestId);
             var assetAdHost = canonicalizeHost(parseURI(assetDetails.url).hostname);
             var assetBenchmark = (Date.now() - assetDetails.timeStamp);
-            var assetOriginUrl = canonicalizeHost(parseURI(details.originUrl).hostname);
-            var asset
+            var assetOriginUrl;
+            var asset;
             var assetSize;
             var assetAdNetwork;
 
             // get the size of the asset we loaded
             details.responseHeaders.forEach(function(headItem){
-                if(headItem.name == 'Content-Length') {
+                if (headItem.name === 'Content-Length') {
                     assetSize = headItem.value;
+                } else if (headItem.name === 'Referer') {
+                    assetOriginUrl = canonicalizeHost(parseURI(headItem.value).hostname);
                 }
             });
 
@@ -18367,7 +18375,7 @@ function startRequestListeners() {
             // remove it from the sent Map
             assetSentTimes.delete(details.requestId);
             
-            browser.tabs.get(details.tabId, function (tab) {
+            chrome.tabs.get(details.tabId, function (tab) {
                 var host = canonicalizeHost(parseURI(tab.url).hostname);
 
                 // set the asset complete time
@@ -18389,8 +18397,8 @@ function startRequestListeners() {
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 
     // Every 5 minutes, log our results to a db
-    browser.alarms.create("dbsend", {periodInMinutes: 2});
-    browser.alarms.onAlarm.addListener(function (alarm) {
+    chrome.alarms.create("dbsend", {periodInMinutes: 2});
+    chrome.alarms.onAlarm.addListener(function (alarm) {
 
         /*** Deal with our locally stored benchmark data dump ***/
 
@@ -18451,7 +18459,7 @@ function startRequestListeners() {
     });
 
     // listen for a change in the open tabs so we can grab all currently open tabs
-    browser.tabs.onUpdated.addListener(function (tabID, changeInfo) {
+    chrome.tabs.onUpdated.addListener(function (tabID, changeInfo) {
         if (changeInfo.status === 'loading') {
             mainFrameOriginTopHosts[tabID] = null;
         }
