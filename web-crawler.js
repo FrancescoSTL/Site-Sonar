@@ -13,13 +13,6 @@ var {allHosts, canonicalizeHost} = require('./js/canonicalize');
 // parse our blacklist
 parseDisconnectJSON();
 
-// general flow:
-// 1. trigger page load
-// 2. when page is requested, start listeners and log results
-// 3. when page is completed via tabs onupdated, remove sendheaders listener, stop logging results, and set timeout for checking for uncompleted requests
-// 4. when timeout completes, remove onheadersrecieved listener, iterate through the logged results, and log them as errors/timeouts
-// 5. trigger new page load
-
 // start our listeners
 startRequestListeners();
 
@@ -76,22 +69,33 @@ function startRequestListeners() {
                     statusCode: details.statusCode,
                     adNetwork: assetAdNetwork };
 
-                chrome.storage.local.get({ assetBenchmarks: [] }, function (loadTimes) {
-                    var assetBenchmarks = loadTimes.assetBenchmarks;
-                    assetBenchmarks.push(neededAssetDetails);
-
-                    chrome.storage.local.set({ assetBenchmarks });
-                });
-
                 // save the asset details
                 assetLoadTimes.set(details.requestId, neededAssetDetails);
             });
         }
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 
-        // Every 5 minutes, log our results to a db
+    // Every 5 minutes, log our results to a db
     browser.alarms.create("dbsend", {periodInMinutes: 2});
     browser.alarms.onAlarm.addListener(function (alarm) {
+
+        /*** Deal with our locally stored benchmark data dump ***/
+
+        // get our current locally stored asset benchmarks
+        chrome.storage.local.get({ assetBenchmarks: [] }, function (loadTimes) {
+            var assetBenchmarks = loadTimes.assetBenchmarks;
+
+            // add all individual benchmarks since our last storage to the array of local benchmarks
+            assetLoadTimes.forEach(function (value, key, map) {
+                assetBenchmarks.push(value);                    
+            });
+
+            // store the newly enlarged array
+            chrome.storage.local.set({ assetBenchmarks });
+        });
+
+        /*** Deal with our remotely stored benchmark data dump ***/
+
         // get user-set sendData preference
         chrome.storage.local.get('sendData', function (result) {
             var sendData = result.sendData;
