@@ -21,6 +21,7 @@
     "webNavigation",
     "alarms",
     "tabs",
-    "https://ultra-lightbeam.herokuapp.com/log"
+    "https://ultra-lightbeam.herokuapp.com/log",
+    "<all_urls>"
   ]
 }
