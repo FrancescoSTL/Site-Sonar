@@ -1,10 +1,13 @@
+![Ultra-Lightbeam Header Image](https://cloud.githubusercontent.com/assets/9794516/17645622/e442be3a-615f-11e6-8898-4916fafca02c.png)
+
 # Ultra-Lightbeam
 A project aimed at identifying ad networks with the fastest and slowest performing ad's on the internet through crowd-sourced, easy to understand, and openly accessible benchmarking data. Inspired by [Lightbeam](https://github.com/mozilla/lightbeam), the Ultra-Lightbeam browser extension (hosted in this repository) locates and benchmarks ad content silently while you browse. It is then sent to Ultra-Lightbeam's servers, where the data is aggregated and displayed on our [public dashboard](http://ultra-lightbeam.com/dashboard).
 
 ## Index
 * [Installing ULB](https://github.com/FrancescoSTL/Ultra-Lightbeam#installing-ultra-lightbeam)
   * [For Firefox](https://github.com/FrancescoSTL/Ultra-Lightbeam#for-firefox)
-  * [For Chrome or Opera](https://github.com/FrancescoSTL/Ultra-Lightbeam#for-chrome-or-opera)
+  * [For Chrome](https://github.com/FrancescoSTL/Ultra-Lightbeam#for-chrome)
+  * [For Opera](https://github.com/FrancescoSTL/Ultra-Lightbeam#for-opera)
 * [Privacy Policy](https://github.com/FrancescoSTL/Ultra-Lightbeam#privacy-policy)
 * [FAQ](https://github.com/FrancescoSTL/Ultra-Lightbeam#faq)
 
@@ -19,8 +22,6 @@ git clone https://github.com/FrancescoSTL/ultra-lightbeam.git
 ```
 
 Download and install [Node.js](https://nodejs.org/en/download/)
-
-##### Running Ultra-Lightbeam
 
 Once you've cloned the repo and installed Node.js, you can start Ultra-Lightbeam by running:
 
@@ -43,11 +44,56 @@ OR
 4. Click "Load Temporary Add-on"
 5. Select any file in your locally downloaded version of Ultra-Lightbeam
 
-### For Chrome or Opera
+### For Chrome
 
+1. Clone the repository by running:
+
+```
+git clone -b Issue%2337-Port-To-Chrome https://github.com/FrancescoSTL/Ultra-Lightbeam.git
+```
+
+2. Download and install [Node.js](https://nodejs.org/en/download/)
+3. Go to `chrome://extensions`
+2. Click "Load Unpacked Extension"
+3. Navigate to the folder where you downloaded ultra-lightbeam
+4. Click "Select"
+
+### For Opera
+
+1. Clone the repository by running:
+
+```
+git clone -b Issue%2337-Port-To-Chrome https://github.com/FrancescoSTL/Ultra-Lightbeam.git
+```
+
+2. Download and install [Node.js](https://nodejs.org/en/download/)
+3. Go to `extensions`
+2. Click "Load Unpacked Extension"
+3. Navigate to the folder where you downloaded ultra-lightbeam
+4. Click "Select"
 
 ## Data Ultra-Lightbeam Collects
+Using Disconnect's Blacklist of ad domains, Ultra-Lightbeam will benchmark and collect the following information about each ad asset in your browser:
 
+1. **assetCompleteTime** `Integer` Amount of time (in milliseconds) that the network took to respond to the HTTP request for the asset. This is calculated using a time diff between [onSendHeaders](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/onSendHeaders) and [onHeadersReceived](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/onHeadersReceived).
+
+2. **originUrl** `String` The URL from which the HTTP request originated. In many cases, this will be the hostUrl, however, sometimes ads will trigger their own HTTP requests. For example, checkout the following example from some real world data we pulled in [Ultra-Lightbeam Issue #17](https://github.com/FrancescoSTL/Ultra-Lightbeam/issues/17#issue-168984693)
+
+3. **hostUrl** `String` The top level host URL from which the HTTP request originated. For example, if you have 3 tabs open and one request originates from the first tab (lets say, `youtube.com`), the top level host would always be said tab's url (`youtube.com`).
+
+4. **adNetworkUrl** `String` The host URL of the ad asset.
+
+5. **assetType** `String` Can be anything recieved by [webRequest.ResourceType](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/WebRequest/ResourceType).
+
+6. **fileSize** `Integer` File size in octets of bits.
+
+7. **timeStamp** `Integer` Time when the asset was requested (in milliseconds) since the [epoch](https://en.wikipedia.org/wiki/Epoch_(reference_date))
+
+8. **method** `String` Either "GET" or "POST".
+
+9. **statusCode** `Integer` Standard HTTP status code returned by the server. Ex: `200`, `404`, `301`, etc
+
+10. **adNetwork** `String` The Ad Network for which the asset belongs.
 
 ## Privacy Policy
 
