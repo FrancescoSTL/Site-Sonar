@@ -3,8 +3,8 @@ A project aimed at identifying ad networks with the fastest and slowest performi
 
 ## Index
 * Installing ULB
-⋅⋅* For Firefox
-⋅⋅* For Chrome or Opera
+  * For Firefox
+  * For Chrome or Opera
 * Privacy Policy
 * FAQ
 
