@@ -1,7 +1,8 @@
 # Ultra-Lightbeam
-A web extension used to identify ad networks with the slowest loading content on the internet; built as an ultra-light sister-project of of [Lightbeam](https://github.com/mozilla/lightbeam). 
+A project aimed at identifying ad networks with the fastest and slowest performing ad's on the internet through crowd-sourced, easy to understand, and openly accessible benchmarking data. Inspired by [Lightbeam](https://github.com/mozilla/lightbeam), the Ultra-Lightbeam browser extension (hosted in this repository) locates and benchmarks ad content silently while you browse. It is then sent to Ultra-Lightbeam's servers, where the data is aggregated and displayed on our [public dashboard](http://ultra-lightbeam.com/dashboard).
 
-By utilizing [Disconnect](https://disconnect.me/)'s list of ad-network domains, Ultra-Lightbeam will locate and benchmark network load-time of ad content while you browse.
+.. contents:: **Index**
+   :depth: 2
 
 ## Installing Ultra-Lightbeam
 
