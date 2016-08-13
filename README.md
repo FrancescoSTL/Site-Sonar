@@ -50,8 +50,8 @@ Ultra-Lightbeam is a browser extension currently supported in Firefox, Chrome, a
 
 ### What you should know
 
-    Upon installing Ultra-Lightbeam, data will be collected locally and stored in your browser. Unless you opt out, every 2 minutes, that data will be sent to Ultra-Lightbeam servers for aggregation and display on our public dashboard.
-    By default, data collected by Ultra-Lightbeam is sent to us.
-    You can chose to opt out of sending any data to us.
-        If you do contribute Ultra-Lightbeam data to us, your browser will send us your data in a manner which we believe minimizes your risk of being re-identified (you can see a list of the kind of data involved here). We will post your data along with data from others in an aggregated and open database. Opening this data can help users and researchers make more informed decisions based on the collective information.
-        Uninstalling Lightbeam prevents collection of any further Ultra-Lightbeam data and will delete the data stored locally in your browser.
+1. Upon installing Ultra-Lightbeam, data will be collected locally and stored in your browser. Unless you opt out, every 2 minutes, that data will be sent to Ultra-Lightbeam servers for aggregation and display on our public dashboard.
+2. By default, data collected by Ultra-Lightbeam is sent to us.
+3. You can chose to opt out of sending any data to us.
+4. If you do contribute Ultra-Lightbeam data to us, your browser will send us your data in a manner which we believe minimizes your risk of being re-identified (you can see a list of the kind of data involved here). We will post your data along with data from others in an aggregated and open database. Opening this data can help users and researchers make more informed decisions based on the collective information.
+5. Uninstalling Lightbeam prevents collection of any further Ultra-Lightbeam data and will delete the data stored locally in your browser.
