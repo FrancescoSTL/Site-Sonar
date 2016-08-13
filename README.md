@@ -42,3 +42,16 @@ OR
 After Ultra-Lightbeam does its thing, ad content load speed will be logged to the [Ultra-Lightbeam Dashboard](http://ultra-lightbeam.com). Keep checking back for dashboard updates!
 
 ![Ultra-Lightbeam Banner](https://cloud.githubusercontent.com/assets/9794516/17311436/345a3c22-5800-11e6-8aec-ee0644d7023d.png)
+
+## Privacy Policy
+
+### Ultra-Lightbeam Privacy Summary
+Ultra-Lightbeam is a browser extension currently supported in Firefox, Chrome, and Opera, which silently collects data about how ad's are performing in your browser. After collecting that data, it will be sent to Ultra-Lightbeam's server to aggregate (unless you opt out) and keep ad networks accountable through publicly accessible performance information.
+
+### What you should know
+
+    Upon installing Ultra-Lightbeam, data will be collected locally and stored in your browser. Unless you opt out, every 2 minutes, that data will be sent to Ultra-Lightbeam servers for aggregation and display on our public dashboard.
+    By default, data collected by Ultra-Lightbeam is sent to us.
+    You can chose to opt out of sending any data to us.
+        If you do contribute Ultra-Lightbeam data to us, your browser will send us your data in a manner which we believe minimizes your risk of being re-identified (you can see a list of the kind of data involved here). We will post your data along with data from others in an aggregated and open database. Opening this data can help users and researchers make more informed decisions based on the collective information.
+        Uninstalling Lightbeam prevents collection of any further Ultra-Lightbeam data and will delete the data stored locally in your browser.
