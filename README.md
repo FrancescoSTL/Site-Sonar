@@ -10,6 +10,8 @@ A project aimed at identifying ad networks with the fastest and slowest performi
 
 ## Installing Ultra-Lightbeam
 
+### For Firefox
+
 Clone the repository by running:
 
 ```
@@ -18,14 +20,14 @@ git clone https://github.com/FrancescoSTL/ultra-lightbeam.git
 
 Download and install [Node.js](https://nodejs.org/en/download/)
 
-## Running Ultra-Lightbeam
+##### Running Ultra-Lightbeam
 
 Once you've cloned the repo and installed Node.js, you can start Ultra-Lightbeam by running:
 
 1. `npm install`
 2. `npm run bundle`
 
-### With `web-ext`
+##### With `web-ext`
 
 If you're using web-ext, you'll need to do so with a pre-release version of Firefox for now, as it is only supported in Firefox 49 or higher.
 
@@ -35,18 +37,14 @@ If you're using web-ext, you'll need to do so with a pre-release version of Fire
 
 OR
 
-### Without `web-ext`
+#### Without `web-ext`
 
 3. Go to `about:debugging`
 4. Click "Load Temporary Add-on"
 5. Select any file in your locally downloaded version of Ultra-Lightbeam
 
+### For Chrome or Opera
 
-## Interpreting Results
-
-After Ultra-Lightbeam does its thing, ad content load speed will be logged to the [Ultra-Lightbeam Dashboard](http://ultra-lightbeam.com). Keep checking back for dashboard updates!
-
-![Ultra-Lightbeam Banner](https://cloud.githubusercontent.com/assets/9794516/17311436/345a3c22-5800-11e6-8aec-ee0644d7023d.png)
 
 ## Privacy Policy
 
