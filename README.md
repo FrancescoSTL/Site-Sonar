@@ -1,9 +1,19 @@
-# Ultra-Lightbeam
-A web extension used to identify ad networks with the slowest loading content on the internet; built as an ultra-light sister-project of of [Lightbeam](https://github.com/mozilla/lightbeam). 
+![Ultra-Lightbeam Header Image](https://cloud.githubusercontent.com/assets/9794516/17645622/e442be3a-615f-11e6-8898-4916fafca02c.png)
 
-By utilizing [Disconnect](https://disconnect.me/)'s list of ad-network domains, Ultra-Lightbeam will locate and benchmark network load-time of ad content while you browse.
+# Ultra-Lightbeam
+A project aimed at identifying ad networks with the fastest and slowest performing ad's on the internet through crowd-sourced, easy to understand, and openly accessible benchmarking data. Inspired by [Lightbeam](https://github.com/mozilla/lightbeam), the Ultra-Lightbeam browser extension (hosted in this repository) locates and benchmarks ad content silently while you browse. It is then sent to Ultra-Lightbeam's servers, where the data is aggregated and displayed on our [public dashboard](http://ultra-lightbeam.com/dashboard).
+
+## Index
+* [Installing ULB](https://github.com/FrancescoSTL/Ultra-Lightbeam#installing-ultra-lightbeam)
+  * [For Firefox](https://github.com/FrancescoSTL/Ultra-Lightbeam#for-firefox)
+  * [For Chrome](https://github.com/FrancescoSTL/Ultra-Lightbeam#for-chrome)
+  * [For Opera](https://github.com/FrancescoSTL/Ultra-Lightbeam#for-opera)
+* [Privacy Policy](https://github.com/FrancescoSTL/Ultra-Lightbeam#privacy-policy)
+* [FAQ](https://github.com/FrancescoSTL/Ultra-Lightbeam#faq)
 
 ## Installing Ultra-Lightbeam
+
+### For Firefox
 
 Clone the repository by running:
 
@@ -13,14 +23,12 @@ git clone https://github.com/FrancescoSTL/ultra-lightbeam.git
 
 Download and install [Node.js](https://nodejs.org/en/download/)
 
-## Running Ultra-Lightbeam
-
 Once you've cloned the repo and installed Node.js, you can start Ultra-Lightbeam by running:
 
 1. `npm install`
 2. `npm run bundle`
 
-### With `web-ext`
+##### With `web-ext`
 
 If you're using web-ext, you'll need to do so with a pre-release version of Firefox for now, as it is only supported in Firefox 49 or higher.
 
@@ -30,15 +38,92 @@ If you're using web-ext, you'll need to do so with a pre-release version of Fire
 
 OR
 
-### Without `web-ext`
+#### Without `web-ext`
 
 3. Go to `about:debugging`
 4. Click "Load Temporary Add-on"
 5. Select any file in your locally downloaded version of Ultra-Lightbeam
 
+### For Chrome
 
-## Interpreting Results
+1. Clone the repository by running:
 
-After Ultra-Lightbeam does its thing, ad content load speed will be logged to the [Ultra-Lightbeam Dashboard](http://ultra-lightbeam.com). Keep checking back for dashboard updates!
+```
+git clone -b Issue%2337-Port-To-Chrome https://github.com/FrancescoSTL/Ultra-Lightbeam.git
+```
 
-![Ultra-Lightbeam Banner](https://cloud.githubusercontent.com/assets/9794516/17311436/345a3c22-5800-11e6-8aec-ee0644d7023d.png)
+2. Download and install [Node.js](https://nodejs.org/en/download/)
+3. Go to `chrome://extensions`
+2. Click "Load Unpacked Extension"
+3. Navigate to the folder where you downloaded ultra-lightbeam
+4. Click "Select"
+
+### For Opera
+
+1. Clone the repository by running:
+
+```
+git clone -b Issue%2337-Port-To-Chrome https://github.com/FrancescoSTL/Ultra-Lightbeam.git
+```
+
+2. Download and install [Node.js](https://nodejs.org/en/download/)
+3. Go to `extensions`
+2. Click "Load Unpacked Extension"
+3. Navigate to the folder where you downloaded ultra-lightbeam
+4. Click "Select"
+
+## Data Ultra-Lightbeam Collects
+Using Disconnect's Blacklist of ad domains, Ultra-Lightbeam will benchmark and collect the following information about each ad asset in your browser:
+
+1. **assetCompleteTime** `Integer` Amount of time (in milliseconds) that the network took to respond to the HTTP request for the asset. This is calculated using a time diff between [onSendHeaders](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/onSendHeaders) and [onHeadersReceived](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/onHeadersReceived).
+
+2. **originUrl** `String` The URL from which the HTTP request originated. In many cases, this will be the hostUrl, however, sometimes ads will trigger their own HTTP requests. For example, checkout the following example from some real world data we pulled in [Ultra-Lightbeam Issue #17](https://github.com/FrancescoSTL/Ultra-Lightbeam/issues/17#issue-168984693)
+
+3. **hostUrl** `String` The top level host URL from which the HTTP request originated. For example, if you have 3 tabs open and one request originates from the first tab (lets say, `youtube.com`), the top level host would always be said tab's url (`youtube.com`).
+
+4. **adNetworkUrl** `String` The host URL of the ad asset.
+
+5. **assetType** `String` Can be anything recieved by [webRequest.ResourceType](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/WebRequest/ResourceType).
+
+6. **fileSize** `Integer` File size in octets of bits.
+
+7. **timeStamp** `Integer` Time when the asset was requested (in milliseconds) since the [epoch](https://en.wikipedia.org/wiki/Epoch_(reference_date))
+
+8. **method** `String` Either "GET" or "POST".
+
+9. **statusCode** `Integer` Standard HTTP status code returned by the server. Ex: `200`, `404`, `301`, etc
+
+10. **adNetwork** `String` The Ad Network for which the asset belongs.
+
+## Privacy Policy
+
+### Ultra-Lightbeam Privacy Summary
+Ultra-Lightbeam is a browser extension currently supported in Firefox, Chrome, and Opera, which silently collects data about how ad's are performing in your browser. After collecting that data, it will be sent to Ultra-Lightbeam's server to aggregate (unless you opt out) and keep ad networks accountable through publicly accessible performance information.
+
+### What you should know
+
+1. Upon installing Ultra-Lightbeam, data will be collected locally and stored in your browser. Unless you opt out, every 2 minutes, that data will be sent to Ultra-Lightbeam servers for aggregation and display on our public dashboard.
+2. By default, data collected by Ultra-Lightbeam is sent to us.
+3. You can chose to opt out of sending any data to us.
+4. If you do contribute Ultra-Lightbeam data to us, your browser will send us your data in a manner which we believe minimizes your risk of being re-identified (you can see a list of the kind of data involved here). We will post your data along with data from others in an aggregated and open database. Opening this data can help users and researchers make more informed decisions based on the collective information.
+5. Uninstalling Lightbeam prevents collection of any further Ultra-Lightbeam data and will delete the data stored locally in your browser.
+
+## FAQ
+
+### Will Ultra-Lightbeam track my browsing history?
+Sort of. Once installed, Ultra-Lightbeam collects the host url of any website you browse that hosts ad content. Read more in our [Privacy Policy](https://github.com/FrancescoSTL/Ultra-Lightbeam#privacy-policy) or [Summary of Data Collection](https://github.com/FrancescoSTL/Ultra-Lightbeam#data-ultra-lightbeam-collects).
+
+### How can I contribute?
+Check out our installation instructions and then head to our Github Issues page for either the [Ultra-Lightbeam web extension](http://github.com/francescostl/ultra-lightbeam/issues) (this repo), or the [Ultra-Lightbeam Dashboard](http://github.com/francescostl/ultra-lightbeamdashboard/issues).
+
+### Who are you?
+A group of humans interested in making the internet a better place through a pragmatic approach to problems on the web.
+
+Specifically:
+* [Francesco Polizzi](http://www.francesco.tech)
+* [Asa Dotzler](https://asadotzler.com/)
+* [Purush Kaushik](https://www.linkedin.com/in/purukaushik)
+* [Justin Potts](https://twitter.com/PottsJustin/)
+
+### How can we contact you?
+Visit our [Contact Page](http://ultra-lightbeam.com/contact).
