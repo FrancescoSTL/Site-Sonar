@@ -49,7 +49,7 @@ OR
 1. Clone the repository by running:
 
 ```
-git clone -b Issue%2337-Port-To-Chrome https://github.com/FrancescoSTL/Ultra-Lightbeam.git
+git clone -b Chrome-and-Opera-Version https://github.com/FrancescoSTL/Ultra-Lightbeam.git
 ```
 
 2. Download and install [Node.js](https://nodejs.org/en/download/)
@@ -63,7 +63,7 @@ git clone -b Issue%2337-Port-To-Chrome https://github.com/FrancescoSTL/Ultra-Lig
 1. Clone the repository by running:
 
 ```
-git clone -b Issue%2337-Port-To-Chrome https://github.com/FrancescoSTL/Ultra-Lightbeam.git
+git clone -b Chrome-and-Opera-Version https://github.com/FrancescoSTL/Ultra-Lightbeam.git
 ```
 
 2. Download and install [Node.js](https://nodejs.org/en/download/)
