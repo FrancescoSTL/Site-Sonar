@@ -2,8 +2,9 @@
 var blocklistSet = new Set();
 var assetLoadTimes = new Map();
 var assetSentTimes = new Map();
+var profileStorage = new Map();
 var mainFrameOriginTopHosts = {};
-var JSONString = "{\"assets\":[";
+var profiling = false;
 
 /* Sherlock Resources & JS */
 const disconnectJSON = require('./data/disconnectBlacklist.json');
@@ -13,8 +14,39 @@ var {allHosts, canonicalizeHost} = require('./js/canonicalize');
 // parse our blacklist
 parseDisconnectJSON();
 
-// start our listeners
+// start our request listeners
 startRequestListeners();
+
+// start our port listener
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        var profileCheck;
+
+        // if we've got a profiling command
+        if (typeof request.profiling !== 'undefined') {
+            // note the new profiling flag
+            profiling = request.profiling;
+        }
+        
+        // if we've got a profile check request
+        if (request.profileCheck) {
+            // note that we're just checking to see if we're currently profiling
+            profileCheck = request.profileCheck;
+        }
+
+        // if we're just checking to see if we're currenlty profiling
+        if(profileCheck) {
+            // send the value of profiling
+            sendResponse({ "isProfiling": profiling });
+        } else if (!profiling) { // if we are supposed to stop profiling
+            var JSONString = stringifyAssetStore(profileStorage);
+            // send the profiling data
+            sendResponse({ "profiles": JSONString });
+
+            // and clear the profiling storage
+            profileStorage.clear();
+        }
+});
 
 function startRequestListeners() {
     // Listen for HTTP headers sent
@@ -71,6 +103,11 @@ function startRequestListeners() {
 
                 // save the asset details
                 assetLoadTimes.set(details.requestId, neededAssetDetails);
+
+                // if we are supposed to be profiling currently, add this record to our profiling Map
+                if (profiling) {
+                    profileStorage.set(details.requestId, neededAssetDetails);
+                }
             });
         }
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
@@ -78,7 +115,6 @@ function startRequestListeners() {
     // Every 5 minutes, log our results to a db
     browser.alarms.create("dbsend", {periodInMinutes: 2});
     browser.alarms.onAlarm.addListener(function (alarm) {
-
         /*** Deal with our locally stored benchmark data dump ***/
 
         // get our current locally stored asset benchmarks
@@ -107,7 +143,8 @@ function startRequestListeners() {
 
                 if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
                     // process our Map store into a JSON string we can send via XMLHTTPRequest
-                    stringifyAssetStore();
+                    var JSONString = stringifyAssetStore(assetLoadTimes);
+                    console.log(JSONString);
 
                     // open XMLHTTPRequest
                     xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/", true);
@@ -119,7 +156,6 @@ function startRequestListeners() {
                             console.log(xhr.responseText);
                             
                             // reset our assets locally for the next data retreival and dump
-                            JSONString = "{\"assets\":[";
                             assetLoadTimes.clear();
                             assetSentTimes.clear();
                         }
@@ -130,7 +166,6 @@ function startRequestListeners() {
                 }
             } else {
                 // reset our assets locally so that memory build up doesn't happen
-                JSONString = "{\"assets\":[";
                 assetLoadTimes.clear();
                 assetSentTimes.clear();
             }
@@ -284,12 +319,15 @@ function getAdNetwork(assetAdHost) {
     return assetAdNetwork;
 }
 
-function stringifyAssetStore() {
-    assetLoadTimes.forEach(function (entry, key, map) {
+function stringifyAssetStore(stringifyStore) {
+    var JSONString = "{\"assets\":[";
+    stringifyStore.forEach(function (entry, key, map) {
         JSONString = JSONString + JSON.stringify(entry) + ",";
     });
 
     JSONString = JSONString.substring(0, JSONString.length-1) + "]}";
+
+    return JSONString
 }
 
 function parseURI(url) {
