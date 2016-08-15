@@ -13,21 +13,21 @@ document.addEventListener('DOMContentLoaded', function() {
 	        }
 	        JSONString += JSONString.substring(0, JSONString.length-1) + "]}]}";
 	        dataOutput.innerHTML = JSONString;
-
-	        copyButton.addEventListener("click", function (event) {
-	        	dataOutput.select();
-
-	        	try {
-	        		var result = document.execCommand('copy');
-	        		if (result) {
-	        			copyButton.insertAdjacentHTML("afterend", "<p>Sucessfully Copied!</p>");
-	        		} else {
-						copyButton.insertAdjacentHTML("afterend", "<p>Copy Unsuccessful :(</p>");
-	        		}
-	        	} catch (e) {
-	        		console.log("Unable to copy to clipboard " + e);
-	        	}
-	        });
         }
 	});
+
+	copyButton.addEventListener("click", function (event) {
+	    dataOutput.select();
+
+	    try {
+	        var result = document.execCommand('copy');
+	        if (result) {
+	        	copyButton.insertAdjacentHTML("afterend", "<p>Sucessfully Copied!</p>");
+	        } else {
+				copyButton.insertAdjacentHTML("afterend", "<p>Copy Unsuccessful :(</p>");
+	        }
+	    } catch (e) {
+	        console.log("Unable to copy to clipboard " + e);
+	    }
+	);
 });

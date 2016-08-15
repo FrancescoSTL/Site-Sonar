@@ -1,9 +1,9 @@
 body {
 	font-family: "Helvetica";
 	overflow: scroll;
-	height: 600px;
 	width: 600px;
-	padding: 30px;
+	height: 600px;
+	padding: 20px;
 }
 
 h1 {
@@ -11,8 +11,15 @@ h1 {
 	color: #9c56b8;
 }
 
+input[type="button"] {
+	padding: 10px;
+	border: none;
+	cursor: pointer;
+}
+
 #userData {
 	width: 100%;
+	margin-top: 20px;
 }
 
 #userData th {
@@ -27,6 +34,29 @@ h1 {
 	margin-bottom: 10px;
 }
 
+#startProfileButton {
+	display: block;
+	margin: 0 auto;
+}
+
+#stopProfileButton {
+	margin: 0 auto;
+	display: none;
+	background-color: #2B98BD;
+	color: white;
+	font-weight: bold;
+}
+
+#recordingText {
+	font-size: 1em;
+	text-align: center;
+	color: grey;
+}
+
+#recordingText {
+	display: none;
+}
+
 .selected {
 	font-weight: bold;
 }
@@ -36,6 +66,6 @@ h1 {
 }
 
 .menu a {
-	margin-right: 10px;
 	display: inline-block;
+	padding: 10px 15px;
 }

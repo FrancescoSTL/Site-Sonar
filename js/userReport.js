@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             userDataTable.innerHTML = newTable;
         } else {
-            window.location.href = "welcome.html";
+            userDataTable.innerHTML = "To begin viewing ad benchmarks, start browsing and check back with this panel."
         }
     });
 });

@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Ultra-Lightbeam Dashboard</title>
+    <script src="../js/profiler.js"></script>
+    <link href="../styles/userReport.css" rel="stylesheet">
+  </head>
+  <body>
+    <h1>Profiling Tool</h1>
+    <div class="menu">
+      <a id="home" href="userReport.html">Dashboard</a>  
+      <a id="profiler" class="selected">Profiler</a>
+      <a id="settings" href="settings.html">Settings</a>  
+      <a id="export" href="export.html">Export Data</a>
+    </div>
+    <div class="options">
+      <input id="startProfileButton" type="button" value="Start Recording Ad Performance">
+      <input id="stopProfileButton" type="button" value="Stop Recording Ad Performance">
+      <p id="recordingText">Ultra-Lightbeam is recording ad-content benchmarking data</p>
+    </div>
+    <div class="profilerResults">
+    	<p id="adNumber"></p>
+    	<p id="adFileSize"></p>
+    	<p id="adLoadTime"></p>
+    </div>
+    <table id="userData"></table>
+  </body>
+</html>
