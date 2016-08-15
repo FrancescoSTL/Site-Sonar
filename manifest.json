@@ -2,8 +2,8 @@
 {
   "description": "Investigating the worst players in slow-loading advertisements on the web.",
   "manifest_version": 2,
-  "name": "ultra-lightbeam",
-  "version": "0.1",
+  "name": "ultra-lightbeam-beta",
+  "version": "0.2",
   "homepage_url": "https://github.com/FrancescoSTL/Ultra-Lightbeam",
   "icons": {
     "48": "icons/border-48.png"

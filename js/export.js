@@ -29,5 +29,5 @@ document.addEventListener('DOMContentLoaded', function() {
 	    } catch (e) {
 	        console.log("Unable to copy to clipboard " + e);
 	    }
-	);
+	});
 });
