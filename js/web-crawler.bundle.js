@@ -18317,6 +18317,9 @@ var assetLoadTimes = new Map();
 var assetSentTimes = new Map();
 var profileStorage = new Map();
 var mainFrameOriginTopHosts = {};
+var totalAssetCount = 0;
+var totalFileSize = 0;
+var totalNetworkTime = 0;
 var profiling = false;
 
 /* Sherlock Resources & JS */
@@ -18335,18 +18338,28 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         var profileCheck;
 
-        // get the profiling message from our port
+        // if we've got a profiling command
         if (typeof request.profiling !== 'undefined') {
+            // note the new profiling flag
             profiling = request.profiling;
         }
-        
-        // get the profileCheck message from our port 
-        if (request.profileCheck) {
-            profileCheck = request.profileCheck;
-        }
 
-        if(profileCheck) {
+        // if we're just checking to see if we're currenlty profiling
+        if(request.profileCheck) {
+            // send the value of profiling
             sendResponse({ "isProfiling": profiling });
+        } else if (request.getOverview) { // if we're requested to return overview benchmarks
+            var overviewBenchmarks = { 
+                fileSize: totalFileSize,
+                networkTime: totalNetworkTime,
+                assetCount: totalAssetCount
+            };
+
+            overviewBenchmarks = JSON.stringify(overviewBenchmarks);
+
+            console.log(overviewBenchmarks);
+
+            sendResponse({ "overviewBenchmarks": overviewBenchmarks });
         } else if (!profiling) { // if we are supposed to stop profiling
             var JSONString = stringifyAssetStore(profileStorage);
             // send the profiling data
@@ -18413,6 +18426,11 @@ function startRequestListeners() {
                 // save the asset details
                 assetLoadTimes.set(details.requestId, neededAssetDetails);
 
+                // increment the high level benchmarks for this batch
+                totalAssetCount++;
+                totalFileSize += assetSize;
+                totalNetworkTime += assetBenchmark;
+
                 // if we are supposed to be profiling currently, add this record to our profiling Map
                 if (profiling) {
                     profileStorage.set(details.requestId, neededAssetDetails);
@@ -18422,7 +18440,7 @@ function startRequestListeners() {
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 
     // Every 5 minutes, log our results to a db
-    browser.alarms.create("dbsend", {periodInMinutes: 2});
+    browser.alarms.create("dbsend", {periodInMinutes: .2});
     browser.alarms.onAlarm.addListener(function (alarm) {
         /*** Deal with our locally stored benchmark data dump ***/
 
@@ -18437,6 +18455,23 @@ function startRequestListeners() {
 
             // store the newly enlarged array
             chrome.storage.local.set({ assetBenchmarks });
+
+            // get the current overview benchmarks
+            chrome.storage.local.get({ overviewBenchmarks: {} }, function (benchmarks) {
+                var overviewBenchmarks = benchmarks.overviewBenchmarks;
+
+                console.log(totalNetworkTime + " " + totalFileSize + " " + totalAssetCount);
+
+                // update the batch's overview bechmarks
+                overviewBenchmarks.fileSize = (typeof overviewBenchmarks.fileSize === 'undefined') ? totalFileSize : overviewBenchmarks.fileSize + totalFileSize;
+                overviewBenchmarks.networkTime = (typeof overviewBenchmarks.networkTime === 'undefined') ? totalNetworkTime : overviewBenchmarks.networkTime + totalNetworkTime;
+                overviewBenchmarks.assetCount = (typeof overviewBenchmarks.assetCount === 'undefined') ? totalAssetCount : overviewBenchmarks.assetCount + totalAssetCount;
+
+                console.log(overviewBenchmarks);
+
+                // store the batch's overview bechmarks
+                chrome.storage.local.set({ overviewBenchmarks });
+            });
         });
 
         /*** Deal with our remotely stored benchmark data dump ***/
@@ -18453,7 +18488,6 @@ function startRequestListeners() {
                 if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
                     // process our Map store into a JSON string we can send via XMLHTTPRequest
                     var JSONString = stringifyAssetStore(assetLoadTimes);
-                    console.log(JSONString);
 
                     // open XMLHTTPRequest
                     xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/", true);

@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	            var profileBenchmarks = profileBenchmarks.assets;
 
 	            // set the total ad count in the DOM
-	            adCount.innerHTML = "<p id=\"adNumber\"><b># Ad Assets: </b> " + Object.keys(profileBenchmarks).length + "</p>";
+	            adCount.innerHTML = "<p id=\"adNumber\"><b>Assets Benchmarked: </b> " + Object.keys(profileBenchmarks).length + "</p>";
 
 	            // iterate through our benchmark storage
 	            for (var record in profileBenchmarks) {
@@ -97,8 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	            totalWaitTime = ((totalWaitTime/1000 >= 1) ?  (Math.round(totalWaitTime/1000)) + " seconds" : totalWaitTime + " milliseconds");
 
 	            // add bechmark counts to the DOM
-	            adSizeCount.innerHTML = "<p id=\"adFileSize\"><b>Total Asset Size: </b> " + totalFileSize + "</p>";
-	            adWaitCount.innerHTML = "<p id=\"adLoadTime\"><b>Total Load Time: </b> " + totalWaitTime + "</p>";
+	            adSizeCount.innerHTML = "<p id=\"adFileSize\"><b>Asset Size: </b> " + totalFileSize + "</p>";
+	            adWaitCount.innerHTML = "<p id=\"adLoadTime\"><b>Network Time: </b> " + totalWaitTime + "</p>";
 
 	            // close the table
 	            newTable += "</table>";

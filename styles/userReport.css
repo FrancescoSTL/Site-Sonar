@@ -17,6 +17,10 @@ input[type="button"] {
 	cursor: pointer;
 }
 
+#benchmarkOverview {
+	display: block;
+}
+
 #userData {
 	width: 100%;
 	margin-top: 20px;
