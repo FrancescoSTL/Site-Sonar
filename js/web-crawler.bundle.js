@@ -18440,7 +18440,7 @@ function startRequestListeners() {
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 
     // Every 5 minutes, log our results to a db
-    browser.alarms.create("dbsend", {periodInMinutes: .2});
+    browser.alarms.create("dbsend", {periodInMinutes: 2});
     browser.alarms.onAlarm.addListener(function (alarm) {
         /*** Deal with our locally stored benchmark data dump ***/
 
