@@ -44,8 +44,6 @@ chrome.runtime.onMessage.addListener(
 
             overviewBenchmarks = JSON.stringify(overviewBenchmarks);
 
-            console.log(overviewBenchmarks);
-
             sendResponse({ "overviewBenchmarks": overviewBenchmarks });
         } else if (!profiling) { // if we are supposed to stop profiling
             var JSONString = stringifyAssetStore(profileStorage);

@@ -15,6 +15,7 @@ input[type="button"] {
 	padding: 10px;
 	border: none;
 	cursor: pointer;
+	margin: 10px;
 }
 
 #benchmarkOverview {

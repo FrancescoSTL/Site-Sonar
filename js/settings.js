@@ -1,19 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
-	var sendDataRadio = document.getElementById('sendRadio');
+	var sendDataCheckbox = document.getElementById('sendCheckbox');
 	var deleteDataButton = document.getElementById('deleteButton');
 
 	chrome.storage.local.get('sendData', function (result) {
-		if (result.sendData === false) {
-			sendDataRadio.checked = false;
-		} else {
-			sendDataRadio.checked = true;
+		if (result.sendData) {
+			sendDataCheckbox.checked = true;
 		}
 
-		sendDataRadio.addEventListener('click', function (event) {
+		sendDataCheckbox.addEventListener('click', function (event) {
 			if(result.sendData === false) {
 				chrome.storage.local.set({ "sendData": true });
 			} else {
-				sendDataRadio.checked = false;
 				chrome.storage.local.set({ "sendData": false });
 			}
 		});
@@ -25,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 deleteDataButton.insertAdjacentHTML("afterend", "<p>Delete Unsuccessful - " + chrome.runtime.lastError + "</p>");
             } else {
                 deleteDataButton.insertAdjacentHTML("afterend", "<p>Sucessfully Deleted!</p>");
+                deleteDataButton.disabled = true;
             }
 		})
 	});
