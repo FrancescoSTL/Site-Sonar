@@ -147,14 +147,14 @@ function startRequestListeners() {
             chrome.storage.local.get({ overviewBenchmarks: {} }, function (benchmarks) {
                 var overviewBenchmarks = benchmarks.overviewBenchmarks;
 
-                console.log(totalNetworkTime + " " + totalFileSize + " " + totalAssetCount);
-
                 // update the batch's overview bechmarks
                 overviewBenchmarks.fileSize = (typeof overviewBenchmarks.fileSize === 'undefined') ? totalFileSize : overviewBenchmarks.fileSize + totalFileSize;
                 overviewBenchmarks.networkTime = (typeof overviewBenchmarks.networkTime === 'undefined') ? totalNetworkTime : overviewBenchmarks.networkTime + totalNetworkTime;
                 overviewBenchmarks.assetCount = (typeof overviewBenchmarks.assetCount === 'undefined') ? totalAssetCount : overviewBenchmarks.assetCount + totalAssetCount;
 
-                console.log(overviewBenchmarks);
+                totalAssetCount = 0;
+                totalFileSize = 0;
+                totalNetworkTime = 0;
 
                 // store the batch's overview bechmarks
                 chrome.storage.local.set({ overviewBenchmarks });
