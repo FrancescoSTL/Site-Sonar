@@ -18359,7 +18359,7 @@ chrome.runtime.onMessage.addListener(
 
             sendResponse({ "overviewBenchmarks": overviewBenchmarks });
         } else if (!profiling) { // if we are supposed to stop profiling
-            var JSONString = stringifyAssetStore(profileStorage);
+            var JSONString = stringifyAssetStore(profileStorage, false);
             // send the profiling data
             sendResponse({ "profiles": JSONString });
 
@@ -18438,7 +18438,7 @@ function startRequestListeners() {
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 
     // Every 5 minutes, log our results to a db
-    browser.alarms.create("dbsend", {periodInMinutes: 2});
+    browser.alarms.create("dbsend", {periodInMinutes: .2});
     browser.alarms.onAlarm.addListener(function (alarm) {
         /*** Deal with our locally stored benchmark data dump ***/
 
@@ -18484,8 +18484,9 @@ function startRequestListeners() {
                 var xhr = new XMLHttpRequest();
 
                 if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
+
                     // process our Map store into a JSON string we can send via XMLHTTPRequest
-                    var JSONString = stringifyAssetStore(assetLoadTimes);
+                    var JSONString = stringifyAssetStore(assetLoadTimes, true);
 
                     // open XMLHTTPRequest
                     xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/", true);
@@ -18640,6 +18641,9 @@ function parseDisconnectJSON() {
     }
 }
 
+/**
+* Gets the ad network for any given ad host
+*/
 function getAdNetwork(assetAdHost) {
     var assetAdNetwork;
 
@@ -18662,17 +18666,38 @@ function getAdNetwork(assetAdHost) {
     return assetAdNetwork;
 }
 
-function stringifyAssetStore(stringifyStore) {
+/**
+* Turns a map of passed asset information into a JSON string and takes 1 in 5 records when minimize is true
+*/
+function stringifyAssetStore(stringifyStore, minimize) {
     var JSONString = "{\"assets\":[";
-    stringifyStore.forEach(function (entry, key, map) {
-        JSONString = JSONString + JSON.stringify(entry) + ",";
-    });
 
+    // if we're wanting to minify our JSON
+    if (minimize) {
+        stringifyStore.forEach(function (entry, key, map) {
+            // generate a random number between 1 and 5
+            var randomNum = Math.floor(Math.random() * 5) + 1;
+
+            // if that number is 3, add it to our JSON string
+            if (randomNum === 3) {
+                JSONString = JSONString + JSON.stringify(entry) + ",";
+            }            
+        });
+    } else {
+        stringifyStore.forEach(function (entry, key, map) {
+            JSONString = JSONString + JSON.stringify(entry) + ",";
+        });
+    }
+       
+    // add the closing bracket
     JSONString = JSONString.substring(0, JSONString.length-1) + "]}";
 
     return JSONString
 }
 
+/**
+* Parses a url for the various parts (host, protocol, hostname, etc)
+*/
 function parseURI(url) {
     var match = url.match(/^((https|http)?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
     return match && {
