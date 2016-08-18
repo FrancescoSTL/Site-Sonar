@@ -1,33 +1,36 @@
 document.addEventListener('DOMContentLoaded', function() {
 	var dataOutput = document.getElementById('outputArea');
 	var copyButton = document.getElementById('copyJSON');
-
-	chrome.storage.local.get('assetBenchmarks', function (result) {
-		if(result.assetBenchmarks) {
-			var JSONString = "{\"assets\": [";
-
-			// clear anything that may have been in our textarea
-			var assetBenchmarks = result.assetBenchmarks;
-			for (var record in assetBenchmarks) {
-		        JSONString += JSON.stringify(assetBenchmarks[record]) + ",";
-	        }
-	        JSONString += JSONString.substring(0, JSONString.length-1) + "]}]}";
-	        dataOutput.innerHTML = JSONString;
-        }
-	});
+	var populateButton = document.getElementById('populateJSON');
 
 	copyButton.addEventListener("click", function (event) {
-	    dataOutput.select();
+		dataOutput.select();
+		var result = document.execCommand('copy');
 
-	    try {
-	        var result = document.execCommand('copy');
-	        if (result) {
-	        	copyButton.insertAdjacentHTML("afterend", "<p>Sucessfully Copied!</p>");
+		if (result) {
+			copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">Sucessfully Copied!</p>");
+		} else {
+			copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">Copy Unsuccessful :( " + result+ "</p>");
+		}
+	});
+
+	populateButton.addEventListener("click", function (event) {
+		chrome.storage.local.get('assetBenchmarks', function (result) {
+			if(result.assetBenchmarks) {
+				populateButton.classList.add("hidden");
+				copyButton.classList.remove("hidden");
+				var JSONString = "{\"assets\": [";
+
+				// clear anything that may have been in our textarea
+				var assetBenchmarks = result.assetBenchmarks;
+				for (var record in assetBenchmarks) {
+			        JSONString += JSON.stringify(assetBenchmarks[record]) + ",";
+		        }
+		        JSONString += JSONString.substring(0, JSONString.length-1) + "]}]}";
+		        dataOutput.innerHTML = JSONString;
 	        } else {
-				copyButton.insertAdjacentHTML("afterend", "<p>Copy Unsuccessful :(</p>");
+	        	copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">No data to export. Note: benchmarks are batched in 2 minute intervals. Check back soon!</p>");
 	        }
-	    } catch (e) {
-	        console.log("Unable to copy to clipboard " + e);
-	    }
+		});
 	});
 });
