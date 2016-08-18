@@ -18490,6 +18490,8 @@ function startRequestListeners() {
                     // open XMLHTTPRequest
                     xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/", true);
                     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    xhr.setRequestHeader("User-Agent", "Anonymous");
+                    xhr.setRequestHeader("Accept-Language", "Anonymous");
                     // making sure our client recieved our results
                     xhr.onreadystatechange = function () {
                         if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
