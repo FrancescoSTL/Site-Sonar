@@ -18464,7 +18464,7 @@ function startRequestListeners() {
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 
     // Every 5 minutes, log our results to a db
-    browser.alarms.create("dbsend", {periodInMinutes: .2});
+    browser.alarms.create("dbsend", {periodInMinutes: 2});
     browser.alarms.onAlarm.addListener(function (alarm) {
         /*** Deal with our locally stored benchmark data dump ***/
 
@@ -18511,8 +18511,6 @@ function startRequestListeners() {
 
                     // process our Map store into a JSON string we can send via XMLHTTPRequest
                     var JSONString = stringifyAssetStore(assetLoadTimes, true);
-
-                    console.log(JSONString);
 
                     // open XMLHTTPRequest
                     xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/", true);

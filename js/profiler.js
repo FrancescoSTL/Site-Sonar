@@ -111,5 +111,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function escapeHTML(str){
-	return str.replace(/[&"'<>]/g, function (m) ({ "&": "&amp;", '"': "&quot;", "'": "&quot;", "<": "&lt;", ">": "&gt;" })[m]);
+	return str.replace(/[&"'<>]/g, function (str) ({ "&": "&amp;", '"': "&quot;", "'": "&quot;", "<": "&lt;", ">": "&gt;" })[str]);
 }
