@@ -1,6 +1,6 @@
 {
-  "name": "ultra-lightbeam-beta",
-  "version": "0.0.2",
+  "name": "site-sonar",
+  "version": "0.1",
   "description": "Investigating the worst players in slow-loading advertisements on the web.",
   "main": "web-crawler.bundle.js",
   "scripts": {

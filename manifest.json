@@ -2,8 +2,8 @@
 {
   "description": "Investigating the worst players in slow-loading advertisements on the web.",
   "manifest_version": 2,
-  "name": "ultra-lightbeam-beta",
-  "version": "0.2.2",
+  "name": "site-sonar",
+  "version": "0.1",
   "homepage_url": "https://github.com/FrancescoSTL/Ultra-Lightbeam",
   "icons": {
     "48": "icons/border-48.png"
@@ -19,7 +19,7 @@
   },
   "browser_action": {
    "default_icon": "icons/border-48.png",
-   "default_title": "Ultra-Lightbeam Dashboard",
+   "default_title": "Site Sonar Dashboard",
    "default_popup": "views/userReport.html"
   },
   "permissions": [

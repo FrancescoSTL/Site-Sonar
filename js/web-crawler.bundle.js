@@ -18409,36 +18409,49 @@ function startRequestListeners() {
             browser.tabs.get(details.tabId, function (tab) {
                 var host = canonicalizeHost(parseURI(tab.url).hostname);
 
-                // set the asset complete time
-                var neededAssetDetails = { assetCompleteTime: assetBenchmark,
-                    originUrl: assetOriginUrl,
-                    hostUrl: host,
-                    adNetworkUrl: assetAdHost,
-                    assetType: details.type,
-                    fileSize: assetSize,
-                    timeStamp: details.timeStamp,
-                    method: details.method,
-                    statusCode: details.statusCode,
-                    adNetwork: assetAdNetwork };
+                // filter out www. from domains
+                if (host.substring(0, 4) === "www.") {
+                    host = host.substring(4, host.length);
+                }
 
-                // save the asset details
-                assetLoadTimes.set(details.requestId, neededAssetDetails);
+                // filter out www. from domains
+                if (assetOriginUrl.substring(0, 4) === "www.") {
+                    assetOriginUrl = assetOriginUrl.substring(4, assetOriginUrl.length);
+                }
 
-                // increment the high level benchmarks for this batch
-                totalAssetCount++;
-                totalFileSize += assetSize;
-                totalNetworkTime += assetBenchmark;
+                // so long as the domain isn't a locally hosted domain
+                if (!host.includes("localhost")) {
+                    // set the asset complete time
+                    var neededAssetDetails = { assetCompleteTime: assetBenchmark,
+                        originUrl: assetOriginUrl,
+                        hostUrl: host,
+                        adNetworkUrl: assetAdHost,
+                        assetType: details.type,
+                        fileSize: assetSize,
+                        timeStamp: details.timeStamp,
+                        method: details.method,
+                        statusCode: details.statusCode,
+                        adNetwork: assetAdNetwork };
 
-                // if we are supposed to be profiling currently, add this record to our profiling Map
-                if (profiling) {
-                    profileStorage.set(details.requestId, neededAssetDetails);
+                    // save the asset details
+                    assetLoadTimes.set(details.requestId, neededAssetDetails);
+
+                    // increment the high level benchmarks for this batch
+                    totalAssetCount++;
+                    totalFileSize += assetSize;
+                    totalNetworkTime += assetBenchmark;
+
+                    // if we are supposed to be profiling currently, add this record to our profiling Map
+                    if (profiling) {
+                        profileStorage.set(details.requestId, neededAssetDetails);
+                    }
                 }
             });
         }
     }, {urls:["*://*/*"]}, ["responseHeaders"]);
 
     // Every 5 minutes, log our results to a db
-    browser.alarms.create("dbsend", {periodInMinutes: 2});
+    browser.alarms.create("dbsend", {periodInMinutes: .2});
     browser.alarms.onAlarm.addListener(function (alarm) {
         /*** Deal with our locally stored benchmark data dump ***/
 
@@ -18487,6 +18500,8 @@ function startRequestListeners() {
 
                     // process our Map store into a JSON string we can send via XMLHTTPRequest
                     var JSONString = stringifyAssetStore(assetLoadTimes, true);
+
+                    console.log(JSONString);
 
                     // open XMLHTTPRequest
                     xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/", true);

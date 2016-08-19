@@ -5,16 +5,42 @@ body {
 	padding: 20px;
 }
 
-h1 {
-	font-weight: 300;
-	color: #9c56b8;
-}
-
 input[type="button"] {
 	padding: 10px;
 	border: none;
 	cursor: pointer;
 	margin: 10px;
+}
+
+#main {
+	width: 100%;
+}
+
+#adNumber {
+	font-size: 2.5em;
+}
+
+#secondary {
+	width: 45%;
+}
+
+#adLoadTime, #adFileSize {
+	font-size: 1.8em;
+}
+
+.body {
+	margin: 0 15px;
+}
+
+.metricBox {
+	display: inline-block;
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.metric {
+	font-weight: bold;
+	margin: 0;
 }
 
 #benchmarkOverview {
@@ -66,24 +92,26 @@ input[type="button"] {
 }
 
 .detail-head {
-	font-weight: bold;
 	margin-bottom: 0px;
+	font-size: 2.5em;
+	font-weight: 300;
+	color: #9c56b8;
 }
 
 .detail-subhead {
-	margin-top: 0px;
+	margin-top: 5px;
 	color: grey;
+}
+
+.head {
+	margin-bottom: 40px;
 }
 
 .selected {
 	font-weight: bold;
 }
 
-.menu {
-	margin-bottom: 20px;
-}
-
 .menu a {
 	display: inline-block;
-	padding: 10px 15px;
+	padding: 10px 15px 0px 15px;
 }

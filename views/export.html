@@ -6,17 +6,20 @@
     <link href="../styles/userReport.css" rel="stylesheet">
   </head>
   <body>
-    <h1>Export Data</h1>
     <div class="menu">
       <a id="home" href="userReport.html">Overview</a>
       <a id="profiler" href="profiler.html">Performance</a>
       <a id="settings" href="settings.html">Settings</a>  
       <a id="export" class="selected">Export Data</a>
     </div>
-    <p class="detail-head">Copy your raw benchmark JSON to your clipboard.</p>
-    <p class="detail-subhead">Just hang tight! Loading your data may take a few seconds.</p>
-    <textarea id="outputArea" rows="4" cols="50"></textarea><br>
-    <button id="populateJSON">Load Data</button>
-    <button id="copyJSON" class="hidden">Copy to Clipboard</button>
+    <div class="body">
+      <div class="head">
+        <p class="detail-head">Export Data</p>
+        <p class="detail-subhead">Copy your raw benchmark JSON to your clipboard <br>Just hang tight! Loading your data may take a few seconds</p>
+      </div>
+      <textarea id="outputArea" rows="4" cols="50"></textarea><br>
+      <button id="populateJSON">Load Data</button>
+      <button id="copyJSON" class="hidden">Copy to Clipboard</button>
+    </div>
   </body>
 </html>

@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		if (result) {
 			copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">Sucessfully Copied!</p>");
+			copyButton.disabled = true;
 		} else {
 			copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">Copy Unsuccessful :( " + result+ "</p>");
 		}
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		        dataOutput.innerHTML = JSONString;
 	        } else {
 	        	copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">No data to export. Note: benchmarks are batched in 2 minute intervals. Check back soon!</p>");
+	        	populateButton.disabled = true;
 	        }
 		});
 	});

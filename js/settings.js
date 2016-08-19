@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	var deleteDataButton = document.getElementById('deleteButton');
 
 	chrome.storage.local.get('sendData', function (result) {
-		if (result.sendData) {
+		if (result.sendData || typeof result.sendData === 'undefined') {
 			sendDataCheckbox.checked = true;
 		}
 

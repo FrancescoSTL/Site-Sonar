@@ -6,23 +6,28 @@
     <link href="../styles/userReport.css" rel="stylesheet">
   </head>
   <body>
-    <h1>Performance</h1>
     <div class="menu">
       <a id="home" href="userReport.html">Overview</a>  
       <a id="profiler" class="selected">Performance</a>
       <a id="settings" href="settings.html">Settings</a>  
       <a id="export" href="export.html">Export Data</a>
     </div>
-    <div class="options">
-      <input id="startProfileButton" type="button" value="Start Recording Ad Performance">
-      <input id="stopProfileButton" type="button" value="Stop Recording Ad Performance">
-      <p id="recordingText">Ultra-Lightbeam is recording ad-content benchmarking data</p>
+    <div class="body">
+      <div class="head">
+        <p class="detail-head">Performance Tool</p>
+        <p class="detail-subhead">Profile websites by recording benchmarks with the profiler tool</p>
+      </div>
+      <div class="options">
+        <input id="startProfileButton" type="button" value="Start Recording Ad Performance">
+        <input id="stopProfileButton" type="button" value="Stop Recording Ad Performance">
+        <p id="recordingText">Ultra-Lightbeam is recording ad-content benchmarking data</p>
+      </div>
+      <div class="benchmarkOverview">
+      	<p id="adNum"></p>
+      	<p id="adFile"></p>
+      	<p id="adLoad"></p>
+      </div>
+      <table id="userData"></table>
     </div>
-    <div class="benchmarkOverview">
-    	<p id="adNumber"></p>
-    	<p id="adFileSize"></p>
-    	<p id="adLoadTime"></p>
-    </div>
-    <table id="userData"></table>
   </body>
 </html>

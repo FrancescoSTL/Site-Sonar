@@ -15,9 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
             var time = formatMillseconds(overviewBenchmarks.networkTime, 1);
             var size = formatBytes(overviewBenchmarks.fileSize, 1);
 
-            adCount.innerHTML = "<p id=\"adNumber\"><b>Assets Benchmarked: </b> " + count + "</p>";
-            adWaitCount.innerHTML = "<p id=\"adLoadTime\"><b>Network Time: </b> " + time + "</p>";
-            adSizeCount.innerHTML = "<p id=\"adFileSize\"><b>Asset Size: </b> " + size  + "</p>";
+            adCount.innerHTML = "<p class=\"metric\" id=\"adNumber\">" + count + "</p>";
+            adWaitCount.innerHTML = "<p class=\"metric\" id=\"adLoadTime\">" + time + "</p>";
+            adSizeCount.innerHTML = "<p class=\"metric\" id=\"adFileSize\">" + size  + "</p>";
         } else {
             chrome.runtime.sendMessage({ "getOverview": true }, function (response) {
                 var overviewBenchmarks = JSON.parse(response.overviewBenchmarks);
@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 var size = formatBytes(overviewBenchmarks.fileSize, 1);
 
                 if (count !== 0) {
-                    adCount.innerHTML = "<p id=\"adNumber\"><b>Assets Benchmarked: </b> " + count + "</p>";
-                    adWaitCount.innerHTML = "<p id=\"adLoadTime\"><b>Network Time: </b> " + time + "</p>";
-                    adSizeCount.innerHTML = "<p id=\"adFileSize\"><b>Asset Size: </b> " + size + "</p>";
+                    adCount.innerHTML = "<p class=\"metric\" id=\"adNumber\">" + count + "</p>";
+                    adWaitCount.innerHTML = "<p class=\"metric\" id=\"adLoadTime\">" + time + "</p>";
+                    adSizeCount.innerHTML = "<p class=\"metric\" id=\"adFileSize\">" + size + "</p>";
                 } else {
                     benchmarkOverview.innerHTML = "To begin viewing ad benchmarks, start browsing and check back with this panel."
                 }
@@ -44,7 +44,7 @@ function formatBytes (bytes, decimals) {
 
     var k = 1024;
     var dm = decimals + 1 || 3;
-    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    var sizes = ['bytes', 'kb', 'mb', 'gb', 'tb', 'pm', 'eb', 'zb', 'yb'];
     var i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
@@ -57,12 +57,12 @@ function formatMillseconds (millisec, decimals) {
     var days = (millisec / (1000 * 60 * 60 * 24)).toFixed(decimals);
 
     if (seconds < 60) {
-        return seconds + " Sec";
+        return seconds + " sec";
     } else if (minutes < 60) {
-        return minutes + " Min";
+        return minutes + " min";
     } else if (hours < 24) {
-        return hours + " Hrs";
+        return hours + " hrs";
     } else {
-        return days + " Days"
+        return days + " days"
     }
 }

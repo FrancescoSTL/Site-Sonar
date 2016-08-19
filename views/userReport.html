@@ -1,22 +1,36 @@
 <!doctype html>
 <html>
   <head>
-    <title>Ultra-Lightbeam Dashboard</title>
+    <title>Site Sonar Dashboard</title>
     <script src="../js/userReport.js"></script>
     <link href="../styles/userReport.css" rel="stylesheet">
   </head>
   <body>
-    <h1>Welcome to Ultra-Lightbeam!</h1>
     <div class="menu">
       <a id="home" class="selected">Overview</a>
       <a id="profiler" href="profiler.html">Performance</a>
       <a id="settings" href="settings.html">Settings</a>  
       <a id="export" href="export.html">Export Data</a>
     </div>
-    <div class="benchmarkOverview">
-      <p id="adNumber"></p>
-      <p id="adFileSize"></p>
-      <p id="adLoadTime"></p>
+    <div class="body">
+      <div class="head">
+        <p class="detail-head">Executive Summary</p>
+        <p class="detail-subhead">Cumulative ad asset data since install</p>
+      </div>
+      <div class="benchmarkOverview">
+        <div class="metricBox" id="main">
+          <p class="metric" id="adNumber"></p>
+          <p class="subMetric">Assets Benchmarked</p>
+        </div>
+        <div class="metricBox" id="secondary">
+          <p class="metric" id="adFileSize"></p>
+          <p class="subMetric">Memory Used on Ads</b>
+        </div>
+        <div class="metricBox" id="secondary">
+          <p class="metric" id="adLoadTime"></p>
+          <p class="subMetric">Network Time Spent on Ads</b>
+        </div>
+      </div>
     </div>
   </body>
 </html>
