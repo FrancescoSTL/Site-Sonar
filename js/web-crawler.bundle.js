@@ -18501,8 +18501,6 @@ function startRequestListeners() {
                     // process our Map store into a JSON string we can send via XMLHTTPRequest
                     var JSONString = stringifyAssetStore(assetLoadTimes, true);
 
-                    console.log(JSONString);
-
                     // open XMLHTTPRequest
                     xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/", true);
                     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");

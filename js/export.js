@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			        JSONString += JSON.stringify(assetBenchmarks[record]) + ",";
 		        }
 		        JSONString += JSONString.substring(0, JSONString.length-1) + "]}]}";
-		        dataOutput.innerHTML = JSONString;
+		        dataOutput.textContent = JSONString;
 	        } else {
 	        	copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">No data to export. Note: benchmarks are batched in 2 minute intervals. Check back soon!</p>");
 	        	populateButton.disabled = true;

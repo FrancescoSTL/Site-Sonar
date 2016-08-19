@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			if(result.sendData === false) {
 				chrome.storage.local.set({ "sendData": true });
 			} else {
-				chrome.storage.local.set({ "sendData": false });
+				chrome.storage.local.set({ "sendData": false })
 			}
 		});
 	});
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	deleteDataButton.addEventListener('click', function (event) {
 		chrome.storage.local.clear(function () {
 		    if (chrome.runtime.lastError) {
-                deleteDataButton.insertAdjacentHTML("afterend", "<p>Delete Unsuccessful - " + chrome.runtime.lastError + "</p>");
+                deleteDataButton.insertAdjacentHTML("afterend", "<p>Delete Unsuccessful - " + escapeHTML(chrome.runtime.lastError) + "</p>");
             } else {
                 deleteDataButton.insertAdjacentHTML("afterend", "<p>Sucessfully Deleted!</p>");
                 deleteDataButton.disabled = true;
@@ -27,3 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		})
 	});
 });
+
+function escapeHTML(str) {
+	return str.replace(/[&"'<>]/g, function (m) ({ "&": "&amp;", '"': "&quot;", "'": "&quot;", "<": "&lt;", ">": "&gt;" })[m]);
+}

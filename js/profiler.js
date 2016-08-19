@@ -84,11 +84,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	                	totalWaitTime += profileBenchmarks[record]["assetCompleteTime"];
 
 	                	// and add the asset to our table
-	                    newTable += "<tr><td>" + profileBenchmarks[record]["hostUrl"] + "</td>";
-	                    newTable += "<td>" + profileBenchmarks[record]["adNetwork"] + "</td>";
-	                    newTable += "<td>" + profileBenchmarks[record]["assetType"] + "</td>";
-	                    newTable += "<td>" + (((profileBenchmarks[record]["fileSize"]/1024) >= 1) ? (Math.round(profileBenchmarks[record]["fileSize"]/1024)) + " kb" : profileBenchmarks[record]["fileSize"] + " bytes") + "</td>";
-	                    newTable += "<td>" + ((profileBenchmarks[record]["assetCompleteTime"]/1000 >= 1) ?  (Math.round(profileBenchmarks[record]["assetCompleteTime"]/1000)) + " s" : profileBenchmarks[record]["assetCompleteTime"] + " ms") + "</td></tr>";
+	                    newTable += "<tr><td>" + escapeHTML(profileBenchmarks[record]["hostUrl"]) + "</td>";
+	                    newTable += "<td>" + escapeHTML(profileBenchmarks[record]["adNetwork"]) + "</td>";
+	                    newTable += "<td>" + escapeHTML(profileBenchmarks[record]["assetType"]) + "</td>";
+	                    newTable += "<td>" + (((parseInt(profileBenchmarks[record]["fileSize"])/1024) >= 1) ? (Math.round(parseInt(profileBenchmarks[record]["fileSize"])/1024)) + " kb" : parseInt(profileBenchmarks[record]["fileSize"]) + " bytes") + "</td>";
+	                    newTable += "<td>" + ((parseInt(profileBenchmarks[record]["assetCompleteTime"])/1000 >= 1) ?  (Math.round(parseInt(profileBenchmarks[record]["assetCompleteTime"])/1000)) + " s" : parseInt(profileBenchmarks[record]["assetCompleteTime"]) + " ms") + "</td></tr>";
 	                }
 	            }
 
@@ -109,3 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	    });
 	});
 });
+
+function escapeHTML(str) {
+	return str.replace(/[&"'<>]/g, function (m) ({ "&": "&amp;", '"': "&quot;", "'": "&quot;", "<": "&lt;", ">": "&gt;" })[m]);
+}
