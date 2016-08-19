@@ -18320,6 +18320,9 @@ var mainFrameOriginTopHosts = {};
 var totalAssetCount = 0;
 var totalFileSize = 0;
 var totalNetworkTime = 0;
+var lastAssetCount = 0;
+var lastFileSize = 0;
+var lastNetworkTime = 0;
 var profiling = false;
 
 /* Sherlock Resources & JS */
@@ -18350,14 +18353,24 @@ chrome.runtime.onMessage.addListener(
             sendResponse({ "isProfiling": profiling });
         } else if (request.getOverview) { // if we're requested to return overview benchmarks
             var overviewBenchmarks = { 
-                fileSize: totalFileSize,
-                networkTime: totalNetworkTime,
-                assetCount: totalAssetCount
+                fileSize: (totalFileSize+lastFileSize),
+                networkTime: (totalNetworkTime+lastNetworkTime),
+                assetCount: (totalAssetCount+lastAssetCount)
             };
 
             overviewBenchmarks = JSON.stringify(overviewBenchmarks);
 
             sendResponse({ "overviewBenchmarks": overviewBenchmarks });
+        } else if (request.deleteOverview) {
+            totalAssetCount = 0;
+            totalFileSize = 0;
+            totalNetworkTime = 0;
+
+            lastAssetCount = 0;
+            lastFileSize = 0;
+            lastNetworkTime = 0;
+
+            sendResponse({ "deletedOverview": true})
         } else if (!profiling) { // if we are supposed to stop profiling
             var JSONString = stringifyAssetStore(profileStorage, false);
             // send the profiling data
@@ -18380,13 +18393,13 @@ function startRequestListeners() {
 
     // Listen for HTTP headers recieved
     browser.webRequest.onHeadersReceived.addListener(function(details) {
-        if(assetSentTimes.get(details.requestId)) {
+        if(assetSentTimes.get(details.requestId) && assetSentTimes.get(details.requestId).url && assetSentTimes.get(details.requestId).originUrl) {
             // get the asset details from the sent Map
             var assetDetails = assetSentTimes.get(details.requestId);
             var assetAdHost = canonicalizeHost(parseURI(assetDetails.url).hostname);
-            var assetBenchmark = (Date.now() - assetDetails.timeStamp);
+            var assetBenchmark = (details.timeStamp - assetDetails.timeStamp);
             var assetOriginUrl = canonicalizeHost(parseURI(details.originUrl).hostname);
-            var asset
+            var asset;
             var assetSize;
             var assetAdNetwork;
 
@@ -18410,7 +18423,7 @@ function startRequestListeners() {
                 var host = canonicalizeHost(parseURI(tab.url).hostname);
 
                 // filter out www. from domains
-                if (host.substring(0, 4) === "www.") {
+                if (host.startsWith("www.")) {
                     host = host.substring(4, host.length);
                 }
 
@@ -18456,33 +18469,31 @@ function startRequestListeners() {
         /*** Deal with our locally stored benchmark data dump ***/
 
         // get our current locally stored asset benchmarks
-        chrome.storage.local.get({ assetBenchmarks: [] }, function (loadTimes) {
-            var assetBenchmarks = loadTimes.assetBenchmarks;
+        chrome.storage.local.get({ assetBenchmarks: [], overviewBenchmarks: {} }, function (benchmarks) {
+            var assetBenchmarks = benchmarks.assetBenchmarks;
 
             // add all individual benchmarks since our last storage to the array of local benchmarks
             assetLoadTimes.forEach(function (value, key, map) {
                 assetBenchmarks.push(value);                    
             });
 
-            // store the newly enlarged array
-            chrome.storage.local.set({ assetBenchmarks });
+            var overviewBenchmarks = benchmarks.overviewBenchmarks;
 
-            // get the current overview benchmarks
-            chrome.storage.local.get({ overviewBenchmarks: {} }, function (benchmarks) {
-                var overviewBenchmarks = benchmarks.overviewBenchmarks;
+            // update the batch's overview bechmarks
+            overviewBenchmarks.fileSize = (typeof overviewBenchmarks.fileSize === 'undefined') ? totalFileSize : overviewBenchmarks.fileSize + totalFileSize;
+            overviewBenchmarks.networkTime = (typeof overviewBenchmarks.networkTime === 'undefined') ? totalNetworkTime : overviewBenchmarks.networkTime + totalNetworkTime;
+            overviewBenchmarks.assetCount = (typeof overviewBenchmarks.assetCount === 'undefined') ? totalAssetCount : overviewBenchmarks.assetCount + totalAssetCount;
 
-                // update the batch's overview bechmarks
-                overviewBenchmarks.fileSize = (typeof overviewBenchmarks.fileSize === 'undefined') ? totalFileSize : overviewBenchmarks.fileSize + totalFileSize;
-                overviewBenchmarks.networkTime = (typeof overviewBenchmarks.networkTime === 'undefined') ? totalNetworkTime : overviewBenchmarks.networkTime + totalNetworkTime;
-                overviewBenchmarks.assetCount = (typeof overviewBenchmarks.assetCount === 'undefined') ? totalAssetCount : overviewBenchmarks.assetCount + totalAssetCount;
+            lastFileSize += totalFileSize;
+            lastNetworkTime += totalNetworkTime;
+            lastAssetCount += totalAssetCount;
 
-                totalAssetCount = 0;
-                totalFileSize = 0;
-                totalNetworkTime = 0;
+            totalAssetCount = 0;
+            totalFileSize = 0;
+            totalNetworkTime = 0;
 
-                // store the batch's overview bechmarks
-                chrome.storage.local.set({ overviewBenchmarks });
-            });
+            // store the batch's overview bechmarks and  the newly enlarged array
+            chrome.storage.local.set({ overviewBenchmarks, assetBenchmarks});
         });
 
         /*** Deal with our remotely stored benchmark data dump ***/
@@ -18494,12 +18505,14 @@ function startRequestListeners() {
             // if they want to send their data (default)
             if (sendData || typeof result.sendData === 'undefined') {
                 // initialize our xmlhttprequest
-                var xhr = new XMLHttpRequest();
+                var xhr = new XMLHttpRequest({mozAnon: true});
 
                 if (alarm.name === "dbsend" && assetLoadTimes.size > 0) {
 
                     // process our Map store into a JSON string we can send via XMLHTTPRequest
                     var JSONString = stringifyAssetStore(assetLoadTimes, true);
+
+                    console.log(JSONString);
 
                     // open XMLHTTPRequest
                     xhr.open("POST", "https://ultra-lightbeam.herokuapp.com/log/", true);
@@ -18509,7 +18522,8 @@ function startRequestListeners() {
                     // making sure our client recieved our results
                     xhr.onreadystatechange = function () {
                         if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                            // output the server's response
+                            // we need to output the server's response for debugging purposes
+                            // so users can detect whether or not their data is being sent to Site Sonar Servers
                             console.log(xhr.responseText);
                             
                             // reset our assets locally for the next data retreival and dump
@@ -18543,13 +18557,17 @@ function isBlacklisted(details) {
     var requestHostMatchesMainFrame = false;
     var requestTabID = details.tabId;
     var requestEntityName;
+    var unparsedOrigin;
+    var origin;
     
     // canonicalize the origin address
-    var unparsedOrigin = parseURI(details.originUrl).hostname;
-    origin = canonicalizeHost(unparsedOrigin);
+    if (details.originUrl) {
+        unparsedOrigin = parseURI(details.originUrl).hostname;
+        origin = canonicalizeHost(unparsedOrigin);
 
-    if (details.frameId === 0) {
-        mainFrameOriginTopHosts[requestTabID] = origin;
+        if (details.frameId === 0) {
+            mainFrameOriginTopHosts[requestTabID] = origin;
+        }
     }
 
     // if it is originating from firefox, new window, or newtab, it is definitely not blacklisted

@@ -11,23 +11,26 @@ document.addEventListener('DOMContentLoaded', function() {
 			if(result.sendData === false) {
 				chrome.storage.local.set({ "sendData": true });
 			} else {
-				chrome.storage.local.set({ "sendData": false })
+				chrome.storage.local.set({ "sendData": false });
 			}
 		});
 	});
 
 	deleteDataButton.addEventListener('click', function (event) {
-		chrome.storage.local.clear(function () {
-		    if (chrome.runtime.lastError) {
-                deleteDataButton.insertAdjacentHTML("afterend", "<p>Delete Unsuccessful - " + escapeHTML(chrome.runtime.lastError) + "</p>");
-            } else {
-                deleteDataButton.insertAdjacentHTML("afterend", "<p>Sucessfully Deleted!</p>");
-                deleteDataButton.disabled = true;
-            }
-		})
+		chrome.runtime.sendMessage({ "deleteOverview": true }, function (response) {
+			chrome.storage.local.clear(function () {
+			    if (chrome.runtime.lastError && !response.deletedOverview) {
+	                deleteDataButton.insertAdjacentHTML("afterend", "<p>Delete Unsuccessful - " + escapeHTML(chrome.runtime.lastError) + "</p>");
+	            } else {
+	                deleteDataButton.insertAdjacentHTML("afterend", "<p>Sucessfully Deleted!</p>");
+	                deleteDataButton.disabled = true;
+	                sendDataCheckbox.checked = true;
+	            }
+			});
+		});
 	});
 });
 
-function escapeHTML(str) {
+function escapeHTML(str){
 	return str.replace(/[&"'<>]/g, function (m) ({ "&": "&amp;", '"': "&quot;", "'": "&quot;", "<": "&lt;", ">": "&gt;" })[m]);
 }

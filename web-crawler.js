@@ -7,6 +7,9 @@ var mainFrameOriginTopHosts = {};
 var totalAssetCount = 0;
 var totalFileSize = 0;
 var totalNetworkTime = 0;
+var lastAssetCount = 0;
+var lastFileSize = 0;
+var lastNetworkTime = 0;
 var profiling = false;
 
 /* Sherlock Resources & JS */
@@ -37,14 +40,24 @@ chrome.runtime.onMessage.addListener(
             sendResponse({ "isProfiling": profiling });
         } else if (request.getOverview) { // if we're requested to return overview benchmarks
             var overviewBenchmarks = { 
-                fileSize: totalFileSize,
-                networkTime: totalNetworkTime,
-                assetCount: totalAssetCount
+                fileSize: (totalFileSize+lastFileSize),
+                networkTime: (totalNetworkTime+lastNetworkTime),
+                assetCount: (totalAssetCount+lastAssetCount)
             };
 
             overviewBenchmarks = JSON.stringify(overviewBenchmarks);
 
             sendResponse({ "overviewBenchmarks": overviewBenchmarks });
+        } else if (request.deleteOverview) {
+            totalAssetCount = 0;
+            totalFileSize = 0;
+            totalNetworkTime = 0;
+
+            lastAssetCount = 0;
+            lastFileSize = 0;
+            lastNetworkTime = 0;
+
+            sendResponse({ "deletedOverview": true})
         } else if (!profiling) { // if we are supposed to stop profiling
             var JSONString = stringifyAssetStore(profileStorage, false);
             // send the profiling data
@@ -67,7 +80,7 @@ function startRequestListeners() {
 
     // Listen for HTTP headers recieved
     browser.webRequest.onHeadersReceived.addListener(function(details) {
-        if(assetSentTimes.get(details.requestId)) {
+        if(assetSentTimes.get(details.requestId) && assetSentTimes.get(details.requestId).url && assetSentTimes.get(details.requestId).originUrl) {
             // get the asset details from the sent Map
             var assetDetails = assetSentTimes.get(details.requestId);
             var assetAdHost = canonicalizeHost(parseURI(assetDetails.url).hostname);
@@ -158,6 +171,10 @@ function startRequestListeners() {
             overviewBenchmarks.networkTime = (typeof overviewBenchmarks.networkTime === 'undefined') ? totalNetworkTime : overviewBenchmarks.networkTime + totalNetworkTime;
             overviewBenchmarks.assetCount = (typeof overviewBenchmarks.assetCount === 'undefined') ? totalAssetCount : overviewBenchmarks.assetCount + totalAssetCount;
 
+            lastFileSize += totalFileSize;
+            lastNetworkTime += totalNetworkTime;
+            lastAssetCount += totalAssetCount;
+
             totalAssetCount = 0;
             totalFileSize = 0;
             totalNetworkTime = 0;
@@ -225,13 +242,17 @@ function isBlacklisted(details) {
     var requestHostMatchesMainFrame = false;
     var requestTabID = details.tabId;
     var requestEntityName;
+    var unparsedOrigin;
+    var origin;
     
     // canonicalize the origin address
-    var unparsedOrigin = parseURI(details.originUrl).hostname;
-    origin = canonicalizeHost(unparsedOrigin);
+    if (details.originUrl) {
+        unparsedOrigin = parseURI(details.originUrl).hostname;
+        origin = canonicalizeHost(unparsedOrigin);
 
-    if (details.frameId === 0) {
-        mainFrameOriginTopHosts[requestTabID] = origin;
+        if (details.frameId === 0) {
+            mainFrameOriginTopHosts[requestTabID] = origin;
+        }
     }
 
     // if it is originating from firefox, new window, or newtab, it is definitely not blacklisted

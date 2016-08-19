@@ -8,31 +8,18 @@ document.addEventListener('DOMContentLoaded', function() {
     newTable = "<table id=\"#userData\"><tr><th align=\"left\">Website</th><th align=\"left\">Ad Network</th><th align=\"left\">File Type</th><th align=\"left\">File Size</th><th align=\"left\">Load Time</th></tr>";
 
     // get the current overview benchmarks
-    chrome.storage.local.get({ overviewBenchmarks: {} }, function (benchmarks) {
-        if(typeof benchmarks.overviewBenchmarks.assetCount !== 'undefined')  {
-            var overviewBenchmarks = benchmarks.overviewBenchmarks;
-            var count = overviewBenchmarks.assetCount;
-            var time = formatMillseconds(overviewBenchmarks.networkTime, 1);
-            var size = formatBytes(overviewBenchmarks.fileSize, 1);
+    chrome.runtime.sendMessage({ "getOverview": true }, function (response) {
+        var overviewBenchmarks = JSON.parse(response.overviewBenchmarks);
+        var count = overviewBenchmarks.assetCount;
+        var time = formatMillseconds(overviewBenchmarks.networkTime, 1);
+        var size = formatBytes(overviewBenchmarks.fileSize, 1);
 
+        if (count !== 0) {
             adCount.innerHTML = "<p class=\"metric\" id=\"adNumber\">" + count + "</p>";
             adWaitCount.innerHTML = "<p class=\"metric\" id=\"adLoadTime\">" + time + "</p>";
-            adSizeCount.innerHTML = "<p class=\"metric\" id=\"adFileSize\">" + size  + "</p>";
+            adSizeCount.innerHTML = "<p class=\"metric\" id=\"adFileSize\">" + size + "</p>";
         } else {
-            chrome.runtime.sendMessage({ "getOverview": true }, function (response) {
-                var overviewBenchmarks = JSON.parse(response.overviewBenchmarks);
-                var count = overviewBenchmarks.assetCount;
-                var time = formatMillseconds(overviewBenchmarks.networkTime, 1);
-                var size = formatBytes(overviewBenchmarks.fileSize, 1);
-
-                if (count !== 0) {
-                    adCount.innerHTML = "<p class=\"metric\" id=\"adNumber\">" + count + "</p>";
-                    adWaitCount.innerHTML = "<p class=\"metric\" id=\"adLoadTime\">" + time + "</p>";
-                    adSizeCount.innerHTML = "<p class=\"metric\" id=\"adFileSize\">" + size + "</p>";
-                } else {
-                    benchmarkOverview.innerHTML = "To begin viewing ad benchmarks, start browsing and check back with this panel."
-                }
-            });
+            benchmarkOverview.innerHTML = "To begin viewing ad benchmarks, start browsing and check back with this panel."
         }
     });
 });

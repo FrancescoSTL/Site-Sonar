@@ -110,6 +110,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	});
 });
 
-function escapeHTML(str) {
+function escapeHTML(str){
 	return str.replace(/[&"'<>]/g, function (m) ({ "&": "&amp;", '"': "&quot;", "'": "&quot;", "<": "&lt;", ">": "&gt;" })[m]);
 }
