@@ -32,5 +32,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function escapeHTML(str){
-	return str.replace(/[&"'<>]/g, function (str) ({ "&": "&amp;", '"': "&quot;", "'": "&quot;", "<": "&lt;", ">": "&gt;" })[str]);
+	return str.replace(/[&"'<>]/g, (m) => ({ "&": "&amp;", '"': "&quot;", "'": "&#39;", "<": "&lt;", ">": "&gt;" })[m]);
 }
