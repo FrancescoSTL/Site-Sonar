@@ -1,21 +1,14 @@
-
 {
   "description": "Investigating the worst players in slow-loading advertisements on the web.",
   "manifest_version": 2,
   "name": "site-sonar",
   "version": "0.1",
-  "homepage_url": "https://github.com/FrancescoSTL/Ultra-Lightbeam",
+  "homepage_url": "https://github.com/FrancescoSTL/Site-Sonar",
   "icons": {
     "48": "icons/border-48.png"
   },
   "background": {
     "scripts": ["js/web-crawler.bundle.js"]
-  },
-  "applications": {
-    "gecko": {
-      "id": "ultra-lightbeam@mozilla.org",
-      "strict_min_version": "45.0"
-    }
   },
   "browser_action": {
    "default_icon": "icons/border-48.png",

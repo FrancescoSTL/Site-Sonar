@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FrancescoSTL/Ultra-Lightbeam"
+    "url": "git+https://github.com/FrancescoSTL/Site-Sonar"
   },
   "author": "Francesco Polizzi",
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/FrancescoSTL/Ultra-Lightbeam/issues"
+    "url": "https://github.com/FrancescoSTL/Site-Sonar/issues"
   },
-  "homepage": "https://github.com/FrancescoSTL/Ultra-Lightbeam#readme",
+  "homepage": "https://site-sonar.com",
   "devDependencies": {
     "browserify": "13.0.1",
     "web-ext": "1.3.0"
