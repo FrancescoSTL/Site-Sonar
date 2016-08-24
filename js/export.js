@@ -20,15 +20,12 @@ document.addEventListener('DOMContentLoaded', function() {
 			if(result.assetBenchmarks) {
 				populateButton.classList.add("hidden");
 				copyButton.classList.remove("hidden");
-				var JSONString = "{\"assets\": [";
+
 
 				// clear anything that may have been in our textarea
-				var assetBenchmarks = result.assetBenchmarks;
-				for (var record in assetBenchmarks) {
-			        JSONString += JSON.stringify(assetBenchmarks[record]) + ",";
-		        }
-		        JSONString += JSONString.substring(0, JSONString.length-1) + "]}]}";
-		        dataOutput.textContent = JSONString;
+				var dict = { "assets": result.assetBenchmarks}
+		        dataOutput.textContent = JSON.stringify(dict);
+
 	        } else {
 	        	copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">No data to export. Note: benchmarks are batched in 2 minute intervals. Check back soon!</p>");
 	        	populateButton.disabled = true;
