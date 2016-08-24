@@ -86,12 +86,12 @@ function startRequestListeners() {
 
     // Listen for HTTP headers recieved
     chrome.webRequest.onHeadersReceived.addListener(function(details) {
-        if(assetSentTimes.get(details.requestId) && assetSentTimes.get(details.requestId).url && assetSentTimes.get(details.requestId).originUrl) {
+        if(assetSentTimes.get(details.requestId) && assetSentTimes.get(details.requestId).url) {
             // get the asset details from the sent Map
             var assetDetails = assetSentTimes.get(details.requestId);
             var assetAdHost = canonicalizeHost(parseURI(assetDetails.url).hostname);
             var assetBenchmark = (details.timeStamp - assetDetails.timeStamp);
-            var assetOriginUrl = canonicalizeHost(parseURI(details.originUrl).hostname);
+            var assetOriginUrl;
             var asset;
             var assetSize;
             var assetAdNetwork;
@@ -120,11 +120,6 @@ function startRequestListeners() {
                 // filter out www. from domains
                 if (host.startsWith("www.")) {
                     host = host.substring(4, host.length);
-                }
-
-                // filter out www. from domains
-                if (assetOriginUrl.substring(0, 4) === "www.") {
-                    assetOriginUrl = assetOriginUrl.substring(4, assetOriginUrl.length);
                 }
 
                 // so long as the domain isn't a locally hosted domain
