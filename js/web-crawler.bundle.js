@@ -9672,14 +9672,6 @@ module.exports={
             "adsrevenue.net"
         ]
     },
-    "Adsrevenue": {
-        "properties": [
-            "adsnative.com"
-        ],
-        "resources": [
-            "adsnative.com"
-        ]
-    },
     "Adtegrity.com": {
         "properties": [
             "adtegrity.com",
@@ -18336,50 +18328,19 @@ parseDisconnectJSON();
 // start our request listeners
 startRequestListeners();
 
-// start our port listener
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-        var profileCheck;
+// initialize our previously stored benchmark vars
+initStorage();
 
-        // if we've got a profiling command
-        if (typeof request.profiling !== 'undefined') {
-            // note the new profiling flag
-            profiling = request.profiling;
-        }
+function initStorage() {
+    chrome.storage.local.get({ overviewBenchmarks: {} }, function (benchmarks) {
+        var overviewBenchmarks = benchmarks.overviewBenchmarks;
 
-        // if we're just checking to see if we're currenlty profiling
-        if(request.profileCheck) {
-            // send the value of profiling
-            sendResponse({ "isProfiling": profiling });
-        } else if (request.getOverview) { // if we're requested to return overview benchmarks
-            var overviewBenchmarks = { 
-                fileSize: (totalFileSize+lastFileSize),
-                networkTime: (totalNetworkTime+lastNetworkTime),
-                assetCount: (totalAssetCount+lastAssetCount)
-            };
-
-            overviewBenchmarks = JSON.stringify(overviewBenchmarks);
-
-            sendResponse({ "overviewBenchmarks": overviewBenchmarks });
-        } else if (request.deleteOverview) {
-            totalAssetCount = 0;
-            totalFileSize = 0;
-            totalNetworkTime = 0;
-
-            lastAssetCount = 0;
-            lastFileSize = 0;
-            lastNetworkTime = 0;
-
-            sendResponse({ "deletedOverview": true})
-        } else if (!profiling) { // if we are supposed to stop profiling
-            var JSONString = stringifyAssetStore(profileStorage, false);
-            // send the profiling data
-            sendResponse({ "profiles": JSONString });
-
-            // and clear the profiling storage
-            profileStorage.clear();
-        }
-});
+        // update the batch's overview bechmarks
+        totalFileSize = (typeof overviewBenchmarks.fileSize !== 'undefined') ? overviewBenchmarks.fileSize : totalFileSize;
+        totalNetworkTime = (typeof overviewBenchmarks.networkTime !== 'undefined') ? overviewBenchmarks.networkTime : totalNetworkTime;
+        totalAssetCount = (typeof overviewBenchmarks.assetCount !== 'undefined') ? overviewBenchmarks.assetCount : totalAssetCount;
+    });
+}
 
 function startRequestListeners() {
     // Listen for HTTP headers sent
@@ -18493,7 +18454,7 @@ function startRequestListeners() {
             totalNetworkTime = 0;
 
             // store the batch's overview bechmarks and  the newly enlarged array
-            chrome.storage.local.set({ overviewBenchmarks, assetBenchmarks});
+            chrome.storage.local.set({ assetBenchmarks, overviewBenchmarks });
         });
 
         /*** Deal with our remotely stored benchmark data dump ***/
@@ -18523,7 +18484,7 @@ function startRequestListeners() {
                             // we need to output the server's response for debugging purposes
                             // so users can detect whether or not their data is being sent to Site Sonar Servers
                             console.log(xhr.responseText);
-                            
+
                             // reset our assets locally for the next data retreival and dump
                             assetLoadTimes.clear();
                             assetSentTimes.clear();
@@ -18532,11 +18493,11 @@ function startRequestListeners() {
 
                     // send our data as a DOMString
                     xhr.send(JSONString);
+                } else {
+                    // reset our assets locally so that memory build up doesn't happen
+                    assetLoadTimes.clear();
+                    assetSentTimes.clear();
                 }
-            } else {
-                // reset our assets locally so that memory build up doesn't happen
-                assetLoadTimes.clear();
-                assetSentTimes.clear();
             }
         });
     });
@@ -18545,6 +18506,50 @@ function startRequestListeners() {
     browser.tabs.onUpdated.addListener(function (tabID, changeInfo) {
         if (changeInfo.status === 'loading') {
             mainFrameOriginTopHosts[tabID] = null;
+        }
+    });
+
+    // start our port listener
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        var profileCheck;
+
+        // if we've got a profiling command
+        if (typeof request.profiling !== 'undefined') {
+            // note the new profiling flag
+            profiling = request.profiling;
+        }
+
+         // if we're just checking to see if we're currenlty profiling
+        if(request.profileCheck) {
+            // send the value of profiling
+            sendResponse({ "isProfiling": profiling });
+        } else if (request.getOverview) { // if we're requested to return overview benchmarks
+            var overviewBenchmarks = {
+                fileSize: (totalFileSize+lastFileSize),
+                networkTime: (totalNetworkTime+lastNetworkTime),
+                assetCount: (totalAssetCount+lastAssetCount)
+            };
+
+            overviewBenchmarks = JSON.stringify(overviewBenchmarks);
+
+            sendResponse({ "overviewBenchmarks": overviewBenchmarks });
+        } else if (request.deleteOverview) {
+            totalAssetCount = 0;
+            totalFileSize = 0;
+            totalNetworkTime = 0;
+
+            lastAssetCount = 0;
+            lastFileSize = 0;
+            lastNetworkTime = 0;
+
+            sendResponse({ "deletedOverview": true})
+        } else if (!profiling) { // if we are supposed to stop profiling
+            var JSONString = stringifyAssetStore(profileStorage, false);
+            // send the profiling data
+            sendResponse({ "profiles": JSONString });
+
+            // and clear the profiling storage
+            profileStorage.clear();
         }
     });
 }
