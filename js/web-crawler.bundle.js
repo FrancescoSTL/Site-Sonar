@@ -18513,18 +18513,22 @@ function startRequestListeners() {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         var profileCheck;
 
-        // if we've got a profiling command
+// if we've got a profiling command
         if (typeof request.profiling !== 'undefined') {
             // note the new profiling flag
             profiling = request.profiling;
         }
 
-         // if we're just checking to see if we're currenlty profiling
+        // if we're just checking to see if we're currenlty profiling
         if(request.profileCheck) {
             // send the value of profiling
             sendResponse({ "isProfiling": profiling });
-        } else if (request.getOverview) { // if we're requested to return overview benchmarks
-            var overviewBenchmarks = {
+
+            return;
+        }
+
+        if (request.getOverview) { // if we're requested to return overview benchmarks
+            var overviewBenchmarks = { 
                 fileSize: (totalFileSize+lastFileSize),
                 networkTime: (totalNetworkTime+lastNetworkTime),
                 assetCount: (totalAssetCount+lastAssetCount)
@@ -18533,7 +18537,11 @@ function startRequestListeners() {
             overviewBenchmarks = JSON.stringify(overviewBenchmarks);
 
             sendResponse({ "overviewBenchmarks": overviewBenchmarks });
-        } else if (request.deleteOverview) {
+
+            return;
+        }
+
+        if (request.deleteOverview) {
             totalAssetCount = 0;
             totalFileSize = 0;
             totalNetworkTime = 0;
@@ -18543,13 +18551,19 @@ function startRequestListeners() {
             lastNetworkTime = 0;
 
             sendResponse({ "deletedOverview": true})
-        } else if (!profiling) { // if we are supposed to stop profiling
+
+            return;
+        }
+
+        if (!profiling) { // if we are supposed to stop profiling
             var JSONString = stringifyAssetStore(profileStorage, false);
             // send the profiling data
             sendResponse({ "profiles": JSONString });
 
             // and clear the profiling storage
             profileStorage.clear();
+
+            return;
         }
     });
 }
