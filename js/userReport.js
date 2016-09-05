@@ -7,21 +7,32 @@ document.addEventListener('DOMContentLoaded', function() {
     
     newTable = "<table id=\"#userData\"><tr><th align=\"left\">Website</th><th align=\"left\">Ad Network</th><th align=\"left\">File Type</th><th align=\"left\">File Size</th><th align=\"left\">Load Time</th></tr>";
 
-    // get the current overview benchmarks
-    chrome.runtime.sendMessage({ "getOverview": true }, function (response) {
-        var overviewBenchmarks = JSON.parse(response.overviewBenchmarks);
-        var count = overviewBenchmarks.assetCount;
-        var time = formatMillseconds(overviewBenchmarks.networkTime, 1);
-        var size = formatBytes(overviewBenchmarks.fileSize, 1);
+    getOverview();
+    
+    window.setInterval(getOverview, 1000);
 
-        if (count !== 0) {
-            adCount.innerHTML = "<p class=\"metric\" id=\"adNumber\">" + count + "</p>";
-            adWaitCount.innerHTML = "<p class=\"metric\" id=\"adLoadTime\">" + time + "</p>";
-            adSizeCount.innerHTML = "<p class=\"metric\" id=\"adFileSize\">" + size + "</p>";
-        } else {
-            benchmarkOverview.innerHTML = "To begin viewing ad benchmarks, start browsing and check back with this panel."
-        }
-    });
+    function getOverview() {
+        // get the current overview benchmarks
+        chrome.runtime.sendMessage({ "getOverview": true, "profileCheck": true }, function (response) {
+            var profiling = response.isProfiling;
+            if (profiling) {
+                window.location = "/views/profiler.html";
+            } else {
+                var overviewBenchmarks = JSON.parse(response.overviewBenchmarks);
+                var count = overviewBenchmarks.assetCount;
+                var time = formatMillseconds(overviewBenchmarks.networkTime, 1);
+                var size = formatBytes(overviewBenchmarks.fileSize, 1);
+
+                if (count !== 0) {
+                    adCount.innerHTML = "<p class=\"metric\" id=\"adNumber\">" + count + "</p>";
+                    adWaitCount.innerHTML = "<p class=\"metric\" id=\"adLoadTime\">" + time + "</p>";
+                    adSizeCount.innerHTML = "<p class=\"metric\" id=\"adFileSize\">" + size + "</p>";
+                } else {
+                    window.location = "/views/welcome.html";
+                }
+            }
+        });
+    }
 });
 
 function formatBytes (bytes, decimals) {
