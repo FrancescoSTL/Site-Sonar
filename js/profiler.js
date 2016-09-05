@@ -97,8 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	            totalWaitTime = ((totalWaitTime/1000 >= 1) ?  (Math.round(totalWaitTime/1000)) + " seconds" : totalWaitTime + " milliseconds");
 
 	            // add bechmark counts to the DOM
-	            adSizeCount.innerHTML = "<p id=\"adFile\"><b>Asset Size: </b> " + totalFileSize + "</p>";
-	            adWaitCount.innerHTML = "<p id=\"adLoad\"><b>Network Time: </b> " + totalWaitTime + "</p>";
+	            adSizeCount.innerHTML = "<p id=\"adFile\"><b>Memory Used on Ads: </b> " + totalFileSize + "</p>";
+	            adWaitCount.innerHTML = "<p id=\"adLoad\"><b>Network Time Spent on Ads: </b> " + totalWaitTime + "</p>";
 
 	            // close the table
 	            newTable += "</table>";

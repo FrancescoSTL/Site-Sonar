@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		var result = document.execCommand('copy');
 
 		if (result) {
-			copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">Sucessfully Copied!</p>");
+			copyButton.insertAdjacentHTML("afterend", "<span class=\"label label-success\">Successfully copied!</span>");
 			copyButton.disabled = true;
 		} else {
-			copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">Copy Unsuccessful :( " + result+ "</p>");
+			copyButton.insertAdjacentHTML("afterend", "<span class=\"label label-danger\">Copy Unsuccessful :( " + result+ "</span>");
 		}
 	});
 
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		        dataOutput.textContent = JSON.stringify(dict);
 
 	        } else {
-	        	copyButton.insertAdjacentHTML("afterend", "<p class=\"errorMsg\">No data to export. Note: benchmarks are batched in 2 minute intervals. Check back soon!</p>");
+	        	copyButton.insertAdjacentHTML("afterend", "<span class=\"label label-danger\">No data to export. Benchmarks are batched in 2 minute intervals. Check back soon!</span>");
 	        	populateButton.disabled = true;
 	        }
 		});

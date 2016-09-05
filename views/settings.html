@@ -8,20 +8,28 @@
   </head>
   <body>
     <div class="container">
-      <div class="menu">
-        <a id="home" href="userReport.html">Overview</a>
-        <a id="profiler" href="profiler.html">Performance</a>
-        <a id="settings" class="selected">Settings</a>  
-        <a id="export" href="export.html">Export Data</a>
-      </div>
+      <ul class="nav nav-tabs">
+        <li role="presentation">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="home" href="userReport.html">Overview</a>
+        </li>
+        <li role="presentation">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="profiler" href="profiler.html">Performance</a>
+        </li>
+        <li role="presentation" class="active">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="settings">Settings</a>
+        </li>
+        <li role="presentation">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="export" href="export.html">Export Data</a>
+        </li>
+      </ul>
       <div class="body">
         <div class="head">
           <p class="detail-head">Settings</p>
           <p class="detail-subhead">Modify your Site Sonar settings</p>
         </div>
         <div class="options">
-          <input id="sendCheckbox" type="checkbox" value="sendData">Send Data to Site Sonar <br><br>
-          <input id="deleteButton" type="button" value="Clear Local Data">
+          <input id="sendCheckbox" type="checkbox" value="sendData"> Send Data to Site Sonar <br><br>
+          <input id="deleteButton" type="button" class="btn btn-default" value="Clear Local Data">
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 
 		sendDataCheckbox.addEventListener('click', function (event) {
-			if(result.sendData === false) {
+			if(sendDataCheckbox.checked) {
 				chrome.storage.local.set({ "sendData": true });
 			} else {
 				chrome.storage.local.set({ "sendData": false });
@@ -20,9 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		chrome.runtime.sendMessage({ "deleteOverview": true }, function (response) {
 			chrome.storage.local.clear(function () {
 			    if (chrome.runtime.lastError && !response.deletedOverview) {
-	                deleteDataButton.insertAdjacentHTML("afterend", "<p>Delete Unsuccessful - " + escapeHTML(chrome.runtime.lastError) + "</p>");
+	                deleteDataButton.insertAdjacentHTML("afterend", "<span class=\"label label-danger\">Delete Unsuccessful - " + escapeHTML(chrome.runtime.lastError) + "</span>");
 	            } else {
-	                deleteDataButton.insertAdjacentHTML("afterend", "<p>Sucessfully Deleted!</p>");
+	                deleteDataButton.insertAdjacentHTML("afterend", "<span class=\"label label-success\">Sucessfully Deleted!</span>");
 	                deleteDataButton.disabled = true;
 	                sendDataCheckbox.checked = true;
 	            }

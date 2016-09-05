@@ -3,9 +3,16 @@ document.addEventListener('DOMContentLoaded', function() {
     var adSizeCount = document.getElementById('adFileSize');
     var adWaitCount = document.getElementById('adLoadTime');
     var benchmarkOverview = document.getElementById('benchmarkOverview');
+    var dashboardLink = document.getElementById('openUrl');
     var newTable;
     
     newTable = "<table id=\"#userData\"><tr><th align=\"left\">Website</th><th align=\"left\">Ad Network</th><th align=\"left\">File Type</th><th align=\"left\">File Size</th><th align=\"left\">Load Time</th></tr>";
+
+    // link to the dashboard link click
+    dashboardLink.addEventListener('click', function (e) {
+        // open the dashboard in a new tab
+        chrome.runtime.sendMessage({ "openTab": true, "openUrl": "http://site-sonar.com/dashboard?utm_source=site-sonar&utm_medium=add-on&utm_campaign=site-sonar-v1" });
+    });
 
     getOverview();
     
@@ -41,7 +48,7 @@ function formatBytes (bytes, decimals) {
     }
 
     var k = 1024;
-    var dm = decimals + 1 || 3;
+    var dm = decimals || 3;
     var sizes = ['bytes', 'kb', 'mb', 'gb', 'tb', 'pm', 'eb', 'zb', 'yb'];
     var i = Math.floor(Math.log(bytes) / Math.log(k));
 
