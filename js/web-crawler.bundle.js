@@ -18510,61 +18510,67 @@ function startRequestListeners() {
     });
 
     // start our port listener
-    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-        var profileCheck;
+    chrome.runtime.onMessage.addListener(
+        function(request, sender, sendResponse) {
+            var profileCheck;
 
-// if we've got a profiling command
-        if (typeof request.profiling !== 'undefined') {
-            // note the new profiling flag
-            profiling = request.profiling;
-        }
+            // if we've got a profiling command
+            if (typeof request.profiling !== 'undefined') {
+                // note the new profiling flag
+                profiling = request.profiling;
+            }
 
-        // if we're just checking to see if we're currenlty profiling
-        if(request.profileCheck) {
-            // send the value of profiling
-            sendResponse({ "isProfiling": profiling });
+            if (request.getOverview) { // if we're requested to return overview benchmarks
+                var overviewBenchmarks = { 
+                    fileSize: (totalFileSize+lastFileSize),
+                    networkTime: (totalNetworkTime+lastNetworkTime),
+                    assetCount: (totalAssetCount+lastAssetCount)
+                };
 
-            return;
-        }
+                overviewBenchmarks = JSON.stringify(overviewBenchmarks);
 
-        if (request.getOverview) { // if we're requested to return overview benchmarks
-            var overviewBenchmarks = { 
-                fileSize: (totalFileSize+lastFileSize),
-                networkTime: (totalNetworkTime+lastNetworkTime),
-                assetCount: (totalAssetCount+lastAssetCount)
-            };
+                // if we're also checking to see if we're currenlty profiling
+                if(request.profileCheck) {
+                    // send the value of profiling and overviewBenchmarks
+                    sendResponse({ "overviewBenchmarks": overviewBenchmarks, "isProfiling": profiling });
 
-            overviewBenchmarks = JSON.stringify(overviewBenchmarks);
+                    return;
+                }
 
-            sendResponse({ "overviewBenchmarks": overviewBenchmarks });
+                sendResponse({ "overviewBenchmarks": overviewBenchmarks });
+            }
 
-            return;
-        }
+            // if we're only checking to see if we're currenlty profiling
+            if(request.profileCheck) {
+                sendResponse({ "isProfiling": profiling });
+            }
 
-        if (request.deleteOverview) {
-            totalAssetCount = 0;
-            totalFileSize = 0;
-            totalNetworkTime = 0;
+            if (request.deleteOverview) {
+                totalAssetCount = 0;
+                totalFileSize = 0;
+                totalNetworkTime = 0;
 
-            lastAssetCount = 0;
-            lastFileSize = 0;
-            lastNetworkTime = 0;
+                lastAssetCount = 0;
+                lastFileSize = 0;
+                lastNetworkTime = 0;
 
-            sendResponse({ "deletedOverview": true})
+                sendResponse({ "deletedOverview": true});
+            }
 
-            return;
-        }
+            if (!profiling) { // if we are supposed to stop profiling
+                var JSONString = stringifyAssetStore(profileStorage, false);
+                // send the profiling data
+                sendResponse({ "profiles": JSONString });
 
-        if (!profiling) { // if we are supposed to stop profiling
-            var JSONString = stringifyAssetStore(profileStorage, false);
-            // send the profiling data
-            sendResponse({ "profiles": JSONString });
+                // and clear the profiling storage
+                profileStorage.clear();
+            }
 
-            // and clear the profiling storage
-            profileStorage.clear();
+            if(request.openTab) {
+                browser.tabs.create({ url: request.openUrl });
 
-            return;
-        }
+                return;
+            }
     });
 }
 

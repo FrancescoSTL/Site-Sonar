@@ -32,6 +32,14 @@ input[type="button"] {
 	margin: 0 15px;
 }
 
+.loadError {
+	background-color: red;
+	color: white;
+	padding: 15px;
+	width: 50%;
+	margin: 0 auto;
+}
+
 .metricBox {
 	display: inline-block;
 	text-align: center;
@@ -64,13 +72,15 @@ input[type="button"] {
 	margin-bottom: 10px;
 }
 
+#startProfileButton, #stopProfileButton {
+	margin: 0 auto 10px auto;
+}
+
 #startProfileButton {
 	display: block;
-	margin: 0 auto;
 }
 
 #stopProfileButton {
-	margin: 0 auto;
 	display: none;
 	background-color: #2B98BD;
 	color: white;
@@ -104,7 +114,7 @@ input[type="button"] {
 }
 
 .head {
-	margin-bottom: 40px;
+	margin: 20px 0;
 }
 
 .selected {
