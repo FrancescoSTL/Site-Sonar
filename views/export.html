@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>Site Sonar Dashboard</title>
     <script src="../js/export.js"></script>
@@ -7,20 +7,30 @@
     <link href="../styles/userReport.css" rel="stylesheet">
   </head>
   <body>
-    <div class="menu">
-      <a id="home" href="userReport.html">Overview</a>
-      <a id="profiler" href="profiler.html">Performance</a>
-      <a id="settings" href="settings.html">Settings</a>  
-      <a id="export" class="selected">Export Data</a>
-    </div>
-    <div class="body">
-      <div class="head">
-        <p class="detail-head">Export Data</p>
-        <p class="detail-subhead">Copy your raw benchmark JSON to your clipboard <br>Just hang tight! Loading your data may take a few seconds</p>
+    <div class="container">
+      <ul class="nav nav-tabs">
+        <li role="presentation">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="home" href="userReport.html">Overview</a>
+        </li>
+        <li role="presentation">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="profiler" href="profiler.html">Performance</a>
+        </li>
+        <li role="presentation">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="settings" href="settings.html">Settings</a>
+        </li>
+        <li role="presentation" class="active">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="export">Export Data</a>
+        </li>
+      </ul>
+      <div class="body">
+        <div class="head">
+          <p class="detail-head">Export Data</p>
+          <p class="detail-subhead">Copy your raw benchmark JSON to your clipboard <br>Just hang tight! Loading your data may take a few seconds</p>
+        </div>
+        <textarea id="outputArea" rows="4" cols="50"></textarea><br>
+        <input type="button" class="btn btn-default" id="populateJSON" value="Load Data"></input>
+        <input type="button" class="btn btn-default hidden" id="copyJSON" value="Copy to Clipboard"> </input>
       </div>
-      <textarea id="outputArea" rows="4" cols="50"></textarea><br>
-      <button id="populateJSON">Load Data</button>
-      <button id="copyJSON" class="hidden">Copy to Clipboard</button>
     </div>
   </body>
 </html>

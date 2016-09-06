@@ -1,19 +1,16 @@
 body {
 	font-family: "Helvetica";
-	width: 600px;
-	height: 600px;
+	width: 550px;
+	height: 500px;
 	padding: 20px;
-}
-
-input[type="button"] {
-	padding: 10px;
-	border: none;
-	cursor: pointer;
-	margin: 10px;
 }
 
 #main {
 	width: 100%;
+}
+
+#populateJSON, #copyJSON {
+	margin-bottom: 10px;
 }
 
 #adNumber {
@@ -26,6 +23,11 @@ input[type="button"] {
 
 #adLoadTime, #adFileSize {
 	font-size: 1.8em;
+}
+
+#deleteButton {
+	display: block;
+	margin-bottom: 10px;
 }
 
 .body {

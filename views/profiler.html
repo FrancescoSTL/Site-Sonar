@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>Site Sonar Dashboard</title>
     <script src="../js/profiler.js"></script>
@@ -7,28 +7,38 @@
     <link href="../styles/userReport.css" rel="stylesheet">
   </head>
   <body>
-    <div class="menu">
-      <a id="home" href="userReport.html">Overview</a>  
-      <a id="profiler" class="selected">Performance</a>
-      <a id="settings" href="settings.html">Settings</a>  
-      <a id="export" href="export.html">Export Data</a>
-    </div>
-    <div class="body">
-      <div class="head">
-        <p class="detail-head">Performance Tool</p>
-        <p class="detail-subhead">Profile websites by recording benchmarks with the profiler tool</p>
+    <div class="container">
+      <ul class="nav nav-tabs">
+        <li role="presentation">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="home" href="userReport.html">Overview</a>
+        </li>
+        <li role="presentation" class="active">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="profiler">Performance</a>
+        </li>
+        <li role="presentation">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="settings" href="settings.html">Settings</a>
+        </li>
+        <li role="presentation">
+          <a role="button" aria-haspopup="true" aria-expanded="false" id="export" href="export.html">Export Data</a>
+        </li>
+      </ul>
+      <div class="body">
+        <div class="head">
+          <p class="detail-head">Performance Tool</p>
+          <p class="detail-subhead">Profile websites by recording benchmarks with the profiler tool</p>
+        </div>
+        <div class="options">
+          <input id="startProfileButton" type="button" class="btn btn-default" value="Start Recording Ad Performance">
+          <input id="stopProfileButton" type="button" class="btn btn-info" value="Stop Recording Ad Performance">
+          <p id="recordingText">Site Sonar is recording ad-content benchmarking data</p>
+        </div>
+        <div class="benchmarkOverview">
+        	<p id="adNum"></p>
+        	<p id="adFile"></p>
+        	<p id="adLoad"></p>
+        </div>
+        <table id="userData"></table>
       </div>
-      <div class="options">
-        <input id="startProfileButton" type="button" value="Start Recording Ad Performance">
-        <input id="stopProfileButton" type="button" value="Stop Recording Ad Performance">
-        <p id="recordingText">Site Sonar is recording ad-content benchmarking data</p>
-      </div>
-      <div class="benchmarkOverview">
-      	<p id="adNum"></p>
-      	<p id="adFile"></p>
-      	<p id="adLoad"></p>
-      </div>
-      <table id="userData"></table>
-    </div>
+    <div>
   </body>
 </html>

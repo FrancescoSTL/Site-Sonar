@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var navigateAttemptNum = 0;
     var showedError = false;
 
-    // get the current overview benchmarks
+    // link to the dashboard link click
     dashboardLink.addEventListener('click', function (e) {
     	// open cnn.com in a new tab
     	chrome.runtime.sendMessage({ "openTab": true, "openUrl": "http://cnn.com" });
