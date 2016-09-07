@@ -4,9 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var adWaitCount = document.getElementById('adLoadTime');
     var benchmarkOverview = document.getElementById('benchmarkOverview');
     var dashboardLink = document.getElementById('openUrl');
-    var newTable;
-    
-    newTable = "<table id=\"#userData\"><tr><th align=\"left\">Website</th><th align=\"left\">Ad Network</th><th align=\"left\">File Type</th><th align=\"left\">File Size</th><th align=\"left\">Load Time</th></tr>";
 
     // link to the dashboard link click
     dashboardLink.addEventListener('click', function (e) {
@@ -16,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     getOverview();
     
-    window.setInterval(getOverview, 1000);
+    setInterval(getOverview, 1000);
 
     function getOverview() {
         // get the current overview benchmarks
