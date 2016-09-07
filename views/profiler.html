@@ -25,19 +25,29 @@
       <div class="body">
         <div class="head">
           <p class="detail-head">Performance Tool</p>
-          <p class="detail-subhead">Profile websites by recording benchmarks with the profiler tool</p>
         </div>
         <div class="options">
           <input id="startProfileButton" type="button" class="btn btn-default" value="Start Recording Ad Performance">
-          <input id="stopProfileButton" type="button" class="btn btn-info" value="Stop Recording Ad Performance">
-          <p id="recordingText">Site Sonar is recording ad-content benchmarking data</p>
+          <input id="stopProfileButton" type="button" class="btn btn-info hidden" value="Stop Recording Ad Performance">
+          <p id="recordingText" class="hidden">Site Sonar is recording ad-content benchmarking data</p>
+          <p id="tip">Profile website ad benchmarks using the performance tool. For best results, close all tabs except the one(s) you'd like to profile and start recording above.</p>
         </div>
         <div class="benchmarkOverview">
-        	<p id="adNum"></p>
-        	<p id="adFile"></p>
-        	<p id="adLoad"></p>
+          <div class="metricBox" id="main">
+            <p class="metric" id="adNum"></p>
+            <p class="subMetric hidden" id="numLabel">Ad Assets Benchmarked</p>
+          </div>
+          <div class="metricBox" id="secondary">
+            <p class="metric" id="adFile"></p>
+            <p class="subMetric hidden" id="fileLabel">Memory Used on Ads</b>
+          </div>
+          <div class="metricBox" id="secondary">
+            <p class="metric" id="adLoad"></p>
+            <p class="subMetric hidden" id="loadLabel">Network Time Spent on Ads</b>
+          </div>
         </div>
-        <table id="userData"></table>
+        <textarea id="outputArea" rows="4" cols="50" class="hidden"></textarea><br>
+        <input type="button" class="btn btn-default hidden" id="copyJSON" value="Copy to Clipboard"> </input>
       </div>
     <div>
   </body>

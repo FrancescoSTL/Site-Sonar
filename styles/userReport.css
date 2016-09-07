@@ -1,7 +1,7 @@
 body {
 	font-family: "Helvetica";
 	width: 550px;
-	height: 500px;
+	height: 530px;
 	padding: 20px;
 }
 
@@ -83,7 +83,7 @@ body {
 }
 
 #stopProfileButton {
-	display: none;
+	display: block;
 	background-color: #2B98BD;
 	color: white;
 	font-weight: bold;
@@ -93,10 +93,6 @@ body {
 	font-size: 1em;
 	text-align: center;
 	color: grey;
-}
-
-#recordingText {
-	display: none;
 }
 
 .hidden {
