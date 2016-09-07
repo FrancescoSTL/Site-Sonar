@@ -2,7 +2,7 @@
   "description": "Investigating the worst players in slow-loading advertisements on the web.",
   "manifest_version": 2,
   "name": "site-sonar",
-  "version": "1.0",
+  "version": "1.1",
   "homepage_url": "https://github.com/FrancescoSTL/Site-Sonar",
   "icons": {
     "48": "icons/border-48.png"
